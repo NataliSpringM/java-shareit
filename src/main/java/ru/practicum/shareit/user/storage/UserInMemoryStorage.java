@@ -151,14 +151,12 @@ public class UserInMemoryStorage implements UserStorage {
         if (userId == null) {
             if (userWithSameEmail.isPresent()) {
                 log.info("Email {} уже зарегистрирован в базе.", email);
-                throw new ConflictEmailException(String.format("Email %s уже зарегистрирован в базе."
-                        , email));
+                throw new ConflictEmailException(String.format("Email %s уже зарегистрирован в базе.", email));
             }
         } else {
             if (userWithSameEmail.isPresent() && !userWithSameEmail.get().getId().equals(userId)) {
                 log.info("Email {} уже зарегистрирован в базе.", email);
-                throw new ConflictEmailException(String.format("Email %s уже зарегистрирован в базе."
-                        , email));
+                throw new ConflictEmailException(String.format("Email %s уже зарегистрирован в базе.", email));
             }
         }
     }
