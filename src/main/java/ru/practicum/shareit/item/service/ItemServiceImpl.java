@@ -131,7 +131,7 @@ public class ItemServiceImpl implements ItemService {
         if (Validation.stringIsNotNullOrBlank(newDescription)) {
             item = item.toBuilder().description(newDescription).build();
         }
-        if (Validation.ObjectIsNotNull(newStatus)) {
+        if (Validation.objectIsNotNull(newStatus)) {
             item = item.toBuilder().available(newStatus).build();
         }
         return item;

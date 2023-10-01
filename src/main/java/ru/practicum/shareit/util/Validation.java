@@ -32,7 +32,7 @@ public class Validation {
      * @return if object exists
      */
 
-    public static boolean ObjectIsNotNull(Object object) {
+    public static boolean objectIsNotNull(Object object) {
         return object != null;
     }
 }

@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
+
 /**
  * UserService interface
  */
@@ -16,6 +17,7 @@ public interface UserService {
      * @return registered UserDto object
      */
     UserDto create(UserDto userDto);
+
     /**
      * get UserDto object
      *
@@ -23,6 +25,7 @@ public interface UserService {
      * @return ItemDto object
      */
     UserDto getById(Long userId);
+
     /**
      * update UserDto object
      *
@@ -38,6 +41,7 @@ public interface UserService {
      * @param userId user's id
      */
     boolean delete(Long userId);
+
     /**
      * get all UserDto objects
      *
