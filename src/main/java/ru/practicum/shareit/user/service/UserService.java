@@ -36,17 +36,17 @@ public interface UserService {
     UserDto update(UserDto userDto, Long userId);
 
     /**
-     * delete UserDto object
+     * delete User object
      *
      * @param userId user's id
      */
-    boolean delete(Long userId);
+    void deleteById(Long userId);
 
     /**
      * get all UserDto objects
      *
      * @return list of UserDto objects
      */
-    List<UserDto> getList();
+    List<UserDto> findAll();
 
 }

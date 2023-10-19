@@ -1,8 +1,12 @@
 package ru.practicum.shareit.item.service;
 
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.item.dto.CommentRequestDto;
+import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -17,7 +21,7 @@ public interface ItemService {
      * @param itemDto ItemDto object to register
      * @return registered ItemDto object
      */
-    ItemDto create(Long userId, ItemDto itemDto);
+    ItemDto create(Long userId, @Valid ItemDto itemDto);
 
     /**
      * get ItemDto object
@@ -26,7 +30,7 @@ public interface ItemService {
      * @param itemId item's id
      * @return ItemDto object
      */
-    ItemDto getById(Long userId, Long itemId);
+    ItemResponseDto getById(Long userId, Long itemId);
 
     /**
      * update ItemDto object
@@ -39,11 +43,11 @@ public interface ItemService {
     ItemDto update(Long userId, ItemDto itemDto, Long itemId);
 
     /**
-     * delete ItemDto object
+     * delete Item object by id
      *
      * @param itemId item's id
      */
-    void delete(Long itemId);
+    void deleteById(Long itemId);
 
     /**
      * get all items of a specific user
@@ -51,13 +55,25 @@ public interface ItemService {
      * @param userId user's id
      * @return list of ItemDto objects
      */
-    List<ItemDto> getListByUser(Long userId);
+    List<ItemResponseDto> getListByUser(Long userId);
 
     /**
      * search all available items, contained substring in name or description
      *
-     * @param substring substring for search
-     * @return list of ItemDto objects
+     * @param text substring for search
+     * @return list of ItemDto objects or empty list
      */
-    List<ItemDto> searchItemsBySubstring(String substring);
+    List<ItemResponseDto> searchItemsBySubstring(String text);
+
+    /**
+     * add comment to a specific item
+     *
+     * @param commentRequestDto CommentRequestDto object
+     * @param userId            author's id
+     * @param itemId            item's id
+     * @return CommentResponseDto object
+     */
+
+    CommentResponseDto addComment(CommentRequestDto commentRequestDto, Long userId, Long itemId);
+
 }

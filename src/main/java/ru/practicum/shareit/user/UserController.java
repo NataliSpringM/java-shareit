@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -21,6 +22,7 @@ import java.util.List;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 @Validated
+@Slf4j
 public class UserController {
 
     private final UserService userService;
@@ -29,30 +31,30 @@ public class UserController {
      * обработка POST-запроса на добавление данных пользователя
      *
      * @param userDto объект UserDto
-     * @return объект  //TODO
+     * @return userDto объект
      */
     @PostMapping()
     @Validated({Create.class})
     public UserDto create(@Valid @RequestBody UserDto userDto) {
-        System.out.println("CONTROLLER CREATE");
+        log.info("POST-request to create User: {}", userDto);
         return userService.create(userDto);
     }
 
     /**
-     * обработка GET-запроса на получение пользователя по id
+     * processing a GET request to get a user by id
      *
      * @param id id пользователя
      * @return объект UserDto
      */
     @GetMapping("{id}")
     public UserDto getById(@PathVariable Long id) {
-
+        log.info("GET-request to get a user by id: {}", id);
         return userService.getById(id);
 
     }
 
     /**
-     * обработка PATCH-запроса на обновление данных пользователя
+     * processing PATCH-request to patch a user's properties
      *
      * @param userDto объект UserDto
      * @return обновленный объект User
@@ -61,23 +63,22 @@ public class UserController {
     @Validated({Update.class})
     public UserDto update(@Valid @RequestBody UserDto userDto,
                           @PathVariable("id") Long id) {
-
+        log.info("PATCH-request to update user by id: {}", id);
         return userService.update(userDto, id);
 
     }
 
     /**
-     * обработка DELETE-запроса
+     * processing DELETE-request to delete a user by id
      *
      * @param id id пользователя
-     * @return подтверждение удаления
      */
     @DeleteMapping(value = "/{id}")
-    public boolean delete(@Valid @PathVariable Long id) {
-        return userService.delete(id);
+    public void delete(@Valid @PathVariable Long id) {
+        log.info("DELETE-request to delete user by id: {}", id);
+        userService.deleteById(id);
 
     }
-
 
     /**
      * обработка GET-запроса на получение списка пользователей
@@ -86,7 +87,8 @@ public class UserController {
      */
     @GetMapping()
     public List<UserDto> getList() {
-        return userService.getList();
+        log.info("GET-request to get all users");
+        return userService.findAll();
 
     }
 
