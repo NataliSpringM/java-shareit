@@ -170,8 +170,8 @@ public class ItemServiceImpl implements ItemService {
         Map<Item, List<Comment>> mapComments = getCommentsToAllItems(items);
         List<ItemResponseDto> itemsResponses = items.stream()
                 .map(item -> getItemResponseDto(item,
-                        mapComments.getOrDefault(item, Collections.emptyList())
-                        , LocalDateTime.now()))
+                        mapComments.getOrDefault(item, Collections.emptyList()),
+                        LocalDateTime.now()))
                 .collect(Collectors.toList());
 
         logResultList(itemsResponses);
@@ -275,9 +275,8 @@ public class ItemServiceImpl implements ItemService {
 
     private void checkAccessToCommentAllowed(Long userId, Long itemId) {
         LocalDateTime now = LocalDateTime.now();
-        List<Booking> bookings = bookingJpaRepository.findAllByItem_IdAndBooker_IdAndStatusAndStartIsBefore
-                (itemId, userId, BookingStatus.APPROVED, now);
-
+        List<Booking> bookings = bookingJpaRepository
+                .findAllByItem_IdAndBooker_IdAndStatusAndStartIsBefore(itemId, userId, BookingStatus.APPROVED, now);
         if (bookings.isEmpty()) {
             throw new UnavailableItemException("Вы не вправе оставлять отзывы, "
                     + "поскольку не пользовались данной вещью");
@@ -363,8 +362,8 @@ public class ItemServiceImpl implements ItemService {
      */
     private BookingItemResponseDto getLastBooking(Long itemId, LocalDateTime now) {
         return bookingJpaRepository
-                .findFirstByItemIdAndStatusAndStartIsBeforeOrStartEqualsOrderByEndDesc
-                        (itemId, BookingStatus.APPROVED, now, now)
+                .findFirstByItemIdAndStatusAndStartIsBeforeOrStartEqualsOrderByEndDesc(itemId,
+                        BookingStatus.APPROVED, now, now)
                 .map(BookingMapper::toBookingItemResponseDto)
                 .orElse(null);
 
@@ -379,8 +378,8 @@ public class ItemServiceImpl implements ItemService {
      */
     private BookingItemResponseDto getNextBooking(Long itemId, LocalDateTime now) {
         return bookingJpaRepository
-                .findFirstByItemIdAndStatusAndStartIsAfterOrStartEqualsOrderByStart
-                        (itemId, BookingStatus.APPROVED, now, now)
+                .findFirstByItemIdAndStatusAndStartIsAfterOrStartEqualsOrderByStart(itemId,
+                        BookingStatus.APPROVED, now, now)
                 .map(BookingMapper::toBookingItemResponseDto)
                 .orElse(null);
     }
