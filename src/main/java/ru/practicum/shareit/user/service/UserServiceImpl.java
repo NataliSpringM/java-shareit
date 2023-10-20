@@ -27,10 +27,10 @@ public class UserServiceImpl implements UserService {
     private final UserJpaRepository userJpaRepository;
 
     /**
-     * create UserDto
+     * to add user's data (save and assign identity)
      *
-     * @param userDto UserDto object to register
-     * @return registered UserDto object
+     * @param userDto user to save and register
+     * @return user with assigned id
      */
     @Override
     public UserDto create(UserDto userDto) {
@@ -42,11 +42,11 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * get UserDto object if user exists
-     * throw 404.NOT FOUND ObjectNotFoundException if isn't
+     * get user by id
+     * throw 404.NOT FOUND ObjectNotFoundException if user does not exist
      *
      * @param userId user's id
-     * @return ItemDto object
+     * @return user
      */
     @Override
     public UserDto getById(Long userId) {
@@ -57,12 +57,12 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * update UserDto object
+     * update user's properties
      * throw 404.NOT FOUND ObjectNotFoundException if userId does not exist
      *
      * @param userId  user's id
-     * @param userDto UserDto object with properties to update
-     * @return updated UserDto object
+     * @param userDto user to update
+     * @return updated user
      */
     @Override
     @Transactional
@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * delete User object
+     * delete user by id
      *
      * @param userId user's id
      */
@@ -90,9 +90,9 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * get all UserDto objects
+     * get all users
      *
-     * @return list of UserDto objects or empty list
+     * @return list of users or empty list
      */
     @Override
     @Transactional(readOnly = true)

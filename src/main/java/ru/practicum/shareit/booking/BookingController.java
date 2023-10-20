@@ -14,7 +14,8 @@ import javax.validation.Valid;
 import java.util.List;
 
 /**
- * TODO Sprint add-bookings.
+ * Sprint add-bookings.
+ * processing HTTP-requests to "/bookings" end-point to add, update or get bookings' data.
  */
 @RestController
 @RequestMapping(path = "/bookings")
@@ -25,11 +26,11 @@ public class BookingController {
     private final BookingService bookingService;
 
     /**
-     * create BookingRequestDto
+     * processing POST-request to add booking (save and assign identity)
      *
      * @param userId            owner's id
-     * @param bookingRequestDto BookingRequestDto object to register
-     * @return registered BookingRequestDto object
+     * @param bookingRequestDto booking to save and register
+     * @return booking request with assigned id
      */
     @PostMapping()
     @Validated({Create.class})
@@ -40,11 +41,11 @@ public class BookingController {
     }
 
     /**
-     * processing a GET request to get a booking by id
+     * processing a GET-request to get a booking by id
      *
      * @param userId    user's id
      * @param bookingId booking's id
-     * @return UserDto object
+     * @return booking
      */
     @GetMapping("{bookingId}")
     public BookingResponseDto getById(@RequestHeader("X-Sharer-User-Id") Long userId, @PathVariable Long bookingId) {
@@ -57,8 +58,8 @@ public class BookingController {
      *
      * @param userId    user's id
      * @param bookingId booking id
-     * @param approved  approving or declining
-     * @return updated UserResponseDto object
+     * @param approved  approving or declining (boolean true or false respectively)
+     * @return approved or declined booking
      */
     @PatchMapping("{bookingId}")
     @Validated({Update.class})
@@ -71,7 +72,7 @@ public class BookingController {
     }
 
     /**
-     * processing a GET request to get a booking' list for a specific owner by booking's state
+     * processing a GET-request to get a booking' list for a specific owner by booking's state
      *
      * @param userId owner's id
      * @param state  booking's state (default: all bookings)

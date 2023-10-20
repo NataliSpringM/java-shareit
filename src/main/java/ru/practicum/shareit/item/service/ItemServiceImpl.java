@@ -45,13 +45,14 @@ public class ItemServiceImpl implements ItemService {
     private final CommentJpaRepository commentJpaRepository;
 
     /**
-     * create ItemDto
+     * to add item's data (save and assign identity)
      * throws 404.NOT_FOUND ObjectNotFoundException if user doesn't exist
      *
      * @param userId  owner's id
-     * @param itemDto ItemDto object to register
-     * @return registered ItemDto object
+     * @param itemDto item to register
+     * @return item with assigned id
      */
+
     @Override
     @Transactional
     public ItemDto create(Long userId, @Valid ItemDto itemDto) {
@@ -64,12 +65,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     /**
-     * get ItemResponseDto object with lastBooking, nextBooking and comments
+     * get item by id with lastBooking, nextBooking and comments properties
      * throws 404.NOT_FOUND ObjectNotFoundException if item doesn't exist
      *
      * @param userId owner's id
      * @param itemId item's id
-     * @return ItemDto object
+     * @return item with lastBooking, nextBooking and comments properties
      */
     @Override
     @Transactional(readOnly = true)
@@ -93,15 +94,15 @@ public class ItemServiceImpl implements ItemService {
 
 
     /**
-     * update ItemDto object
+     * update item object
      * throws 404.NOT_FOUND ObjectNotFoundException if user doesn't exist
      * throws 404.NOT_FOUND ObjectNotFoundException if item doesn't exist
      * throws 404.NOT_FOUND AccessIsNotAllowedException if user trying updating is not item's owner
      *
      * @param userId  owner's id
      * @param itemId  item's id
-     * @param itemDto ItemDto object with properties to update
-     * @return updated ItemDto object
+     * @param itemDto item to update
+     * @return updated item
      */
     @Override
     @Transactional
@@ -118,7 +119,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     /**
-     * delete ItemDto object by id
+     * delete item by id
      *
      * @param itemId item's id
      */
@@ -136,7 +137,7 @@ public class ItemServiceImpl implements ItemService {
      * get all items of a specific user
      *
      * @param userId user's id
-     * @return list of ItemDto objects
+     * @return list of items or empty list
      */
     @Override
     @Transactional(readOnly = true)
@@ -157,7 +158,7 @@ public class ItemServiceImpl implements ItemService {
      * search all available items, contained substring in name or description
      *
      * @param text substring for search
-     * @return list of ItemDto objects
+     * @return list of items or empty list
      */
     @Override
     @Transactional(readOnly = true)
@@ -185,10 +186,10 @@ public class ItemServiceImpl implements ItemService {
      * throws 404.NOT_FOUND AccessIsNotAllowedException if owner tries to comment
      * throws 400.BAD_REQUEST UnavailableItemException if user hadn't approved item's booking before
      *
-     * @param commentRequestDto CommentRequestDto object
+     * @param commentRequestDto comment
      * @param userId            author's id
      * @param itemId            item's id
-     * @return CommentResponseDto object
+     * @return comment
      */
     @Override
     @Transactional
@@ -209,7 +210,7 @@ public class ItemServiceImpl implements ItemService {
      * update valid fields
      *
      * @param itemDto properties to check and update
-     * @param item    Item to update
+     * @param item    item to update
      * @return updated Item object
      */
     private Item updateValidFields(Item item, ItemDto itemDto) {
@@ -231,7 +232,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     /**
-     * get User if exists throw 404.NOT FOUND ObjectNotFoundException if isn't
+     * get User if exists
+     * throws 404.NOT FOUND ObjectNotFoundException if isn't
      *
      * @param userId user's id
      * @return User object
@@ -243,7 +245,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     /**
-     * get Item if exists throw 404.NOT FOUND ObjectNotFoundException if isn't
+     * get Item if exists
+     * throws 404.NOT FOUND ObjectNotFoundException if isn't
      *
      * @param itemId item's id
      * @return Item object
@@ -255,7 +258,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     /**
-     * check whether User exists throw 404.NOT FOUND ObjectNotFoundException if isn't
+     * check whether User exists
+     * throws 404.NOT FOUND ObjectNotFoundException if isn't
      *
      * @param userId user's id
      */
@@ -267,7 +271,8 @@ public class ItemServiceImpl implements ItemService {
 
 
     /**
-     * check whether user had item's approved bookings, throws 400.BAD_REQUEST UnavailableItemException if hadn't
+     * check whether user had item's approved bookings
+     * throws 400.BAD_REQUEST UnavailableItemException if hadn't
      *
      * @param itemId item's id
      * @param userId user's id
@@ -285,7 +290,8 @@ public class ItemServiceImpl implements ItemService {
 
 
     /**
-     * check whether user is not item's owner, throws 404.NOT_FOUND AccessIsNotAllowedException if is
+     * check whether user is not item's owner
+     * throws 404.NOT_FOUND AccessIsNotAllowedException if is
      *
      * @param item   Item item
      * @param userId user's id
@@ -298,7 +304,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     /**
-     * check whether user is item's owner, throws 404.NOT_FOUND AccessIsNotAllowedException if isn't
+     * check whether user is item's owner
+     * throws 404.NOT_FOUND AccessIsNotAllowedException if isn't
      *
      * @param item   Item item
      * @param userId user's id
@@ -385,7 +392,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     /**
-     * log list of objects in pretty format
+     * log list of items in pretty format
      *
      * @param items list of items
      */

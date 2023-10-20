@@ -16,6 +16,7 @@ import java.util.List;
 
 /**
  * Sprint add-controllers.
+ * processing HTTP-requests to "/items" end-point to add, update or get items' data and comments to items.
  */
 @RestController
 @RequiredArgsConstructor
@@ -26,11 +27,11 @@ public class ItemController {
     private final ItemService itemService;
 
     /**
-     * create ItemDto
+     * processing POST-request to add item's data (save and assign identity)
      *
      * @param userId  owner's id
-     * @param itemDto ItemDto object to register
-     * @return registered ItemDto object
+     * @param itemDto item to save and register
+     * @return registered item with assigned id
      */
     @PostMapping()
     @Validated({Create.class})
@@ -41,11 +42,11 @@ public class ItemController {
     }
 
     /**
-     * get ItemDto object
+     * processing GET-request to get item by id
      *
      * @param userId owner's id
      * @param itemId item's id
-     * @return ItemDto object
+     * @return item
      */
     @GetMapping("/{itemId}")
     public ItemResponseDto getById(@RequestHeader("X-Sharer-User-Id") Long userId,
@@ -55,12 +56,12 @@ public class ItemController {
     }
 
     /**
-     * update ItemDto object
+     * processing PATCH-request to update item's properties
      *
      * @param userId  owner's id
      * @param itemId  item's id
-     * @param itemDto ItemDto object with properties to update
-     * @return updated ItemDto object
+     * @param itemDto object with properties to update
+     * @return updated item
      */
     @PatchMapping("/{itemId}")
     public ItemDto update(@RequestHeader("X-Sharer-User-Id") Long userId,
@@ -72,7 +73,7 @@ public class ItemController {
     }
 
     /**
-     * delete ItemDto object
+     * processing DELETE-request to delete item
      *
      * @param itemId item's id
      */
@@ -83,10 +84,10 @@ public class ItemController {
     }
 
     /**
-     * get all items of a specific user
+     * processing GET-request to get all items of a specific user
      *
      * @param userId user's id
-     * @return list of ItemDto objects
+     * @return list of items
      */
     @GetMapping()
     public List<ItemResponseDto> getListByUser(@RequestHeader("X-Sharer-User-Id") Long userId) {
@@ -95,7 +96,7 @@ public class ItemController {
     }
 
     /**
-     * search all available items, contained substring in name or description
+     * processing GET-request to search all available items, contained substring in name or description
      *
      * @param substring substring for search
      * @return list of ItemDto objects
@@ -108,12 +109,12 @@ public class ItemController {
     }
 
     /**
-     * add comment to a specific item
+     * processing POST-request to add comment to a specific item
      *
-     * @param commentRequestDto CommentRequestDto object
+     * @param commentRequestDto comment
      * @param userId            author's id
      * @param itemId            item's id
-     * @return CommentResponseDto object
+     * @return registered comment with assigned id
      */
     @PostMapping("{itemId}/comment")
     @Validated({Create.class})

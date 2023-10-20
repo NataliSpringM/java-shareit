@@ -10,20 +10,20 @@ import java.util.List;
  */
 public interface BookingService {
     /**
-     * create BookingRequestDto
+     * to add booking (save and assign identity)
      *
      * @param userId            owner's id
-     * @param bookingRequestDto BookingRequestDto object to register
-     * @return registered BookingRequestDto object
+     * @param bookingRequestDto booking to save and register
+     * @return booking with assigned id
      */
     BookingResponseDto create(Long userId, BookingRequestDto bookingRequestDto);
 
     /**
-     * get BookingResponseDto object by booking's id for owner or booker
+     * get booking by booking's id for owner or booker
      *
      * @param userId    user's id
      * @param bookingId booking's id
-     * @return BookingResponseDto object
+     * @return booking
      */
     BookingResponseDto getById(Long userId, Long bookingId);
 
@@ -33,21 +33,21 @@ public interface BookingService {
      * @param bookingId booking's id
      * @param userId    user's id
      * @param approved  boolean
-     * @return BookingResponseDto with updated (APPROVED or REJECTED status)
+     * @return booking with updated (APPROVED or REJECTED status)
      */
     BookingResponseDto updateStatus(Long bookingId, Long userId, Boolean approved);
 
     /**
-     * Find if exists list of booking by OWNER's id, sorting by start value, starting with new
+     * find if exists list of booking by owner's id, sorting by start value, starting with new
      * by state (default = ALL)
      *
      * @param ownerId owner's id
-     * @return list of bookings of items' OWNER according to specified criteria, sorting by start in descending order
+     * @return list of bookings of items' owner according to specified criteria, sorting by start in descending order
      */
     List<BookingResponseDto> getListByOwner(Long ownerId, String state);
 
     /**
-     * Find if exists list of booking by user's id, sorting by start value, starting with new
+     * find if exists list of booking by user's id, sorting by start value, starting with new
      * by state (default = ALL)
      *
      * @param bookerId user's id

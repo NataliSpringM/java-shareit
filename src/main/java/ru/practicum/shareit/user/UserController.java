@@ -14,8 +14,7 @@ import java.util.List;
 
 /**
  * Sprint add-controllers.
- * обработка запросов HTTP-клиентов на добавление, обновление, получение
- * информации о пользователях по адресу <a href="http://localhost:8080/users">...</a>
+ * processing HTTP-requests to "/users" end-point to add, update and get users' data
  */
 
 @RestController
@@ -28,10 +27,10 @@ public class UserController {
     private final UserService userService;
 
     /**
-     * обработка POST-запроса на добавление данных пользователя
+     * POST-request processing to add user's data (save and assign identity)
      *
-     * @param userDto объект UserDto
-     * @return userDto объект
+     * @param userDto user's data
+     * @return user with assigned id
      */
     @PostMapping()
     @Validated({Create.class})
@@ -41,10 +40,10 @@ public class UserController {
     }
 
     /**
-     * processing a GET request to get a user by id
+     * processing GET-request to get a user by id
      *
-     * @param id id пользователя
-     * @return объект UserDto
+     * @param id user's id
+     * @return user
      */
     @GetMapping("{id}")
     public UserDto getById(@PathVariable Long id) {
@@ -56,8 +55,8 @@ public class UserController {
     /**
      * processing PATCH-request to patch a user's properties
      *
-     * @param userDto объект UserDto
-     * @return обновленный объект User
+     * @param userDto user to update
+     * @return updated user
      */
     @PatchMapping("/{id}")
     @Validated({Update.class})
@@ -71,7 +70,7 @@ public class UserController {
     /**
      * processing DELETE-request to delete a user by id
      *
-     * @param id id пользователя
+     * @param id user's id
      */
     @DeleteMapping(value = "/{id}")
     public void delete(@Valid @PathVariable Long id) {
@@ -81,9 +80,9 @@ public class UserController {
     }
 
     /**
-     * обработка GET-запроса на получение списка пользователей
+     * processing GET-request to get all users
      *
-     * @return список пользователей
+     * @return list of users
      */
     @GetMapping()
     public List<UserDto> getList() {
@@ -91,7 +90,6 @@ public class UserController {
         return userService.findAll();
 
     }
-
 
 }
 

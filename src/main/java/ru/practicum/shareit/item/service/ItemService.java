@@ -15,35 +15,35 @@ import java.util.List;
 @Component
 public interface ItemService {
     /**
-     * create ItemDto
+     * to add item's data (save and assign identity)
      *
      * @param userId  owner's id
-     * @param itemDto ItemDto object to register
-     * @return registered ItemDto object
+     * @param itemDto item to register
+     * @return item with assigned id
      */
     ItemDto create(Long userId, @Valid ItemDto itemDto);
 
     /**
-     * get ItemDto object
+     * get item by id
      *
      * @param userId owner's id
      * @param itemId item's id
-     * @return ItemDto object
+     * @return item
      */
     ItemResponseDto getById(Long userId, Long itemId);
 
     /**
-     * update ItemDto object
+     * update item's properties
      *
      * @param userId  owner's id
      * @param itemId  item's id
      * @param itemDto ItemDto object with properties to update
-     * @return updated ItemDto object
+     * @return updated item
      */
     ItemDto update(Long userId, ItemDto itemDto, Long itemId);
 
     /**
-     * delete Item object by id
+     * delete item by id
      *
      * @param itemId item's id
      */
@@ -53,7 +53,7 @@ public interface ItemService {
      * get all items of a specific user
      *
      * @param userId user's id
-     * @return list of ItemDto objects
+     * @return list of items
      */
     List<ItemResponseDto> getListByUser(Long userId);
 
@@ -61,17 +61,17 @@ public interface ItemService {
      * search all available items, contained substring in name or description
      *
      * @param text substring for search
-     * @return list of ItemDto objects or empty list
+     * @return list of items or empty list
      */
     List<ItemResponseDto> searchItemsBySubstring(String text);
 
     /**
      * add comment to a specific item
      *
-     * @param commentRequestDto CommentRequestDto object
+     * @param commentRequestDto comment
      * @param userId            author's id
      * @param itemId            item's id
-     * @return CommentResponseDto object
+     * @return comment
      */
 
     CommentResponseDto addComment(CommentRequestDto commentRequestDto, Long userId, Long itemId);

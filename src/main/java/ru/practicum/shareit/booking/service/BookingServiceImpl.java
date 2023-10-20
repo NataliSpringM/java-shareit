@@ -35,7 +35,7 @@ public class BookingServiceImpl implements BookingService {
     private final UserJpaRepository userJpaRepository;
 
     /**
-     * create and save Booking, booking is not allowed for item's owner
+     * create (save and assign identity) booking, booking is not allowed for item's owner
      * throws 400.BAD_REQUEST IncorrectTimeException if start and end time of Booking are invalid
      * throws 404.NOT FOUND ObjectNotFoundException if item is not found
      * throws 400.BAD_REQUEST UnavailableItemException if item is not available
@@ -43,8 +43,8 @@ public class BookingServiceImpl implements BookingService {
      * throws 404.NOT_FOUND AccessIsNotAllowedException if owner try booking
      *
      * @param userId            owner's id
-     * @param bookingRequestDto BookingRequestDto object to register
-     * @return registered BookingRequestDto object
+     * @param bookingRequestDto booking to save and register
+     * @return booking with assigned id
      */
     @Override
     @Transactional
@@ -64,13 +64,13 @@ public class BookingServiceImpl implements BookingService {
     }
 
     /**
-     * get BookingResponseDto object by booking's id for owner or booker
+     * get booking by booking's id for owner or booker
      * throws 404.NOT FOUND ObjectNotFoundException if booking is not found
      * throws 400.NOT_FOUND AccessIsNotAllowedException if user is not item's owner or booker
      *
      * @param userId    user's id
      * @param bookingId booking's id
-     * @return BookingResponseDto object
+     * @return booking
      */
     @Override
     @Transactional(readOnly = true)
@@ -91,7 +91,7 @@ public class BookingServiceImpl implements BookingService {
      * @param bookingId booking's id
      * @param userId    user's id
      * @param approved  boolean
-     * @return BookingResponseDto with updated (APPROVED or REJECTED status)
+     * @return booking with updated (APPROVED or REJECTED status)
      */
     @Override
     @Transactional
@@ -111,13 +111,13 @@ public class BookingServiceImpl implements BookingService {
     }
 
     /**
-     * Find if exists list of booking by OWNER's id, sorting by start value, starting with new
+     * find if exists list of booking by owner's id, sorting by start value, starting with new
      * by state (default = ALL)
      * throws 404.NOT_FOUND ObjectNotFoundException if user doesn't exist
      * throws 400.BAD_REQUEST UnsupportedStatusException if state is not BookingStatus
      *
      * @param ownerId owner's id
-     * @return list of bookings of items' OWNER according to specified criteria, sorting by start in descending order
+     * @return list of bookings of items' owner according to specified criteria, sorting by start in descending order
      */
     @Override
     @Transactional(readOnly = true)
@@ -160,7 +160,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     /**
-     * Find if exists list of booking by user's id, sorting by start value, starting with new
+     * find if exists list of booking by user's id, sorting by start value, starting with new
      * by state (default = ALL)
      * throws 404.NOT_FOUND ObjectNotFoundException if user doesn't exist
      * throws 400.BAD_REQUEST UnsupportedStatusException if state is not BookingStatus

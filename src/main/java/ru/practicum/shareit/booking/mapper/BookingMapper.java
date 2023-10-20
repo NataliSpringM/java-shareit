@@ -70,7 +70,9 @@ public class BookingMapper {
      */
 
     public static List<BookingResponseDto> toBookingResponseDtoList(List<Booking> bookings) {
-        return bookings.stream().map(BookingMapper::toBookingResponseDto).collect(Collectors.toList());
+        return bookings.stream()
+                .map(BookingMapper::toBookingResponseDto)
+                .collect(Collectors.toList());
     }
 
     /**
