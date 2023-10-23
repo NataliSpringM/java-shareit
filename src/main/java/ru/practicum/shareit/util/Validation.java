@@ -35,4 +35,5 @@ public class Validation {
     public static boolean objectIsNotNull(Object object) {
         return object != null;
     }
+
 }

@@ -11,42 +11,42 @@ import java.util.List;
 @Component
 public interface UserService {
     /**
-     * create UserDto
+     * to add user's data (save and assign identity)
      *
-     * @param userDto UserDto object to register
-     * @return registered UserDto object
+     * @param userDto user to save and registered
+     * @return user with assigned id
      */
     UserDto create(UserDto userDto);
 
     /**
-     * get UserDto object
+     * get user by id
      *
      * @param userId user's id
-     * @return ItemDto object
+     * @return user
      */
     UserDto getById(Long userId);
 
     /**
-     * update UserDto object
+     * update user's properties
      *
      * @param userId  user's id
-     * @param userDto UserDto object with properties to update
-     * @return updated UserDto object
+     * @param userDto user to update
+     * @return updated user
      */
     UserDto update(UserDto userDto, Long userId);
 
     /**
-     * delete UserDto object
+     * delete user by id
      *
      * @param userId user's id
      */
-    boolean delete(Long userId);
+    void deleteById(Long userId);
 
     /**
-     * get all UserDto objects
+     * get all users
      *
-     * @return list of UserDto objects
+     * @return list of users
      */
-    List<UserDto> getList();
+    List<UserDto> findAll();
 
 }

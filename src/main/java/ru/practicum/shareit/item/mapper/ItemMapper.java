@@ -2,19 +2,24 @@ package ru.practicum.shareit.item.mapper;
 
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.booking.dto.BookingItemResponseDto;
+import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 /**
  * map Item, ItemDto objects into each other
  */
 @Component
 public class ItemMapper {
+
     /**
      * map Item object into IteDto object
      *
@@ -32,32 +37,65 @@ public class ItemMapper {
     }
 
     /**
-     * map ItemDto object into Item object
+     * map ItemDto object into ItemResponseDto object to test
      *
-     * @param item ItemDto object
-     * @return Item object
+     * @param itemDto ItemDto object
+     * @return ItemResponseDto object with null empty properties
      */
-
-    public static Item toItem(ItemDto item, User user, @Nullable ItemRequest request) {
-        return new Item(
-                item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable(),
-                user,
-                request
+    public static ItemResponseDto toItemResponseDto(ItemDto itemDto) {
+        return new ItemResponseDto(
+                itemDto.getId(),
+                itemDto.getName(),
+                itemDto.getDescription(),
+                itemDto.getAvailable(),
+                null,
+                null,
+                null,
+                Collections.emptyList()
         );
     }
 
     /**
-     * map List of Item objects into List of ItemDto objects
+     * map Item object into ItemResponseDto object
      *
-     * @param items list of Item objects
-     * @return List of ItemDto objects
+     * @param item        Item object
+     * @param lastBooking lastBooking of item
+     * @param nextBooking nextBooking of item
+     * @return ItemResponseDto object with null empty properties
+     */
+    public static ItemResponseDto toItemResponseDto(Item item,
+                                                    BookingItemResponseDto lastBooking,
+                                                    BookingItemResponseDto nextBooking,
+                                                    List<CommentResponseDto> comments) {
+        return new ItemResponseDto(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getAvailable(),
+                lastBooking,
+                nextBooking,
+                item.getRequest() != null ? item.getRequest().getId() : null,
+                comments
+        );
+    }
+
+
+    /**
+     * map ItemDto object into Item object
+     *
+     * @param itemDto ItemDto object
+     * @return Item object
      */
 
-    public static List<ItemDto> toItemDtoList(List<Item> items) {
-        return items.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
+    public static Item toItem(ItemDto itemDto, User user, @Nullable ItemRequest request) {
+        return Item.builder()
+                .id(itemDto.getId())
+                .name(itemDto.getName())
+                .description(itemDto.getDescription())
+                .available(itemDto.getAvailable())
+                .owner(user)
+                .request(request)
+                .build();
     }
 
 }

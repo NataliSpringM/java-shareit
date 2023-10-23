@@ -1,24 +1,32 @@
 package ru.practicum.shareit.request;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
-import org.springframework.validation.annotation.Validated;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 /**
  * TODO Sprint add-item-requests.
  */
-@Value
+@Data
 @Builder(toBuilder = true)
-@RequiredArgsConstructor
-@Validated
+@Entity
+@Table(name = "requests")
+@NoArgsConstructor
+@AllArgsConstructor
 public class ItemRequest {
-
-    Long id;
-    String description;
-    Long requestor;
-    LocalDateTime created;
+    @Id
+    @GeneratedValue
+    @Column(name = "id", nullable = false)
+    private Long id;
+    @Column(name = "description", nullable = false)
+    private String description;
+    @Column(name = "requestor", nullable = false)
+    private Long requestor;
+    @Column(name = "created", nullable = false)
+    private LocalDateTime created;
 
 }

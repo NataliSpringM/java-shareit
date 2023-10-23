@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -13,83 +14,82 @@ import java.util.List;
 
 /**
  * Sprint add-controllers.
- * обработка запросов HTTP-клиентов на добавление, обновление, получение
- * информации о пользователях по адресу <a href="http://localhost:8080/users">...</a>
+ * processing HTTP-requests to "/users" end-point to add, update and get users' data
  */
 
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
 @Validated
+@Slf4j
 public class UserController {
 
     private final UserService userService;
 
     /**
-     * обработка POST-запроса на добавление данных пользователя
+     * POST-request processing to add user's data (save and assign identity)
      *
-     * @param userDto объект UserDto
-     * @return объект  //TODO
+     * @param userDto user's data
+     * @return user with assigned id
      */
     @PostMapping()
     @Validated({Create.class})
     public UserDto create(@Valid @RequestBody UserDto userDto) {
-        System.out.println("CONTROLLER CREATE");
+        log.info("POST-request to create User: {}", userDto);
         return userService.create(userDto);
     }
 
     /**
-     * обработка GET-запроса на получение пользователя по id
+     * processing GET-request to get a user by id
      *
-     * @param id id пользователя
-     * @return объект UserDto
+     * @param id user's id
+     * @return user
      */
     @GetMapping("{id}")
     public UserDto getById(@PathVariable Long id) {
-
+        log.info("GET-request to get a user by id: {}", id);
         return userService.getById(id);
 
     }
 
     /**
-     * обработка PATCH-запроса на обновление данных пользователя
+     * processing PATCH-request to patch a user's properties
      *
-     * @param userDto объект UserDto
-     * @return обновленный объект User
+     * @param userDto user to update
+     * @return updated user
      */
     @PatchMapping("/{id}")
     @Validated({Update.class})
     public UserDto update(@Valid @RequestBody UserDto userDto,
                           @PathVariable("id") Long id) {
-
+        log.info("PATCH-request to update user by id: {}", id);
         return userService.update(userDto, id);
 
     }
 
     /**
-     * обработка DELETE-запроса
+     * processing DELETE-request to delete a user by id
      *
-     * @param id id пользователя
-     * @return подтверждение удаления
+     * @param id user's id
      */
     @DeleteMapping(value = "/{id}")
-    public boolean delete(@Valid @PathVariable Long id) {
-        return userService.delete(id);
+    public void delete(@Valid @PathVariable Long id) {
+        log.info("DELETE-request to delete user by id: {}", id);
+        userService.deleteById(id);
 
     }
 
-
     /**
-     * обработка GET-запроса на получение списка пользователей
+     * processing GET-request to get all users
      *
-     * @return список пользователей
+     * @return list of users
      */
     @GetMapping()
     public List<UserDto> getList() {
-        return userService.getList();
+        log.info("GET-request to get all users");
+        return userService.findAll();
 
     }
-
 
 }
 

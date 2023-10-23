@@ -33,11 +33,12 @@ public class UserMapper {
      * @return User object
      */
     public static User toUser(UserDto userDto) {
-        return new User(
-                userDto.getId(),
-                userDto.getName(),
-                userDto.getEmail()
-        );
+        return User.builder()
+                .id(userDto.getId())
+                .name(userDto.getName())
+                .email(userDto.getEmail())
+                .build();
+
     }
 
     /**
@@ -47,7 +48,9 @@ public class UserMapper {
      * @return List of UserDto objects
      */
     public static List<UserDto> toUserDtoList(List<User> users) {
-        return users.stream().map(UserMapper::toUserDto).collect(Collectors.toList());
+        return users.stream()
+                .map(UserMapper::toUserDto)
+                .collect(Collectors.toList());
     }
 
 }
