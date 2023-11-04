@@ -583,9 +583,8 @@ public class ItemRequestServiceImplTest {
         // create page parameters
         int from = 10;
         int size = 10;
-
         PageRequest page = PageRequest.of(from/size, size);
-
+        
         //mock repository answer
         when(userRepository.existsById(ownerId)).thenReturn(true);
         when(itemRequestRepository.findAllByRequesterIdIsNotOrderByCreatedDesc(ownerId, page))
