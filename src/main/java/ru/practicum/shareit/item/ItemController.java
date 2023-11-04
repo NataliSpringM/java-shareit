@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.CommentRequestDto;
-import ru.practicum.shareit.item.dto.CommentResponseDto;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentOutDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.item.dto.ItemOutDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.util.groups.Create;
 
@@ -49,8 +49,8 @@ public class ItemController {
      * @return item
      */
     @GetMapping("/{itemId}")
-    public ItemResponseDto getById(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                   @PathVariable Long itemId) {
+    public ItemOutDto getById(@RequestHeader("X-Sharer-User-Id") Long userId,
+                              @PathVariable Long itemId) {
         log.info("GET-request: получение вещи по id вещи: {}, владелец вещи: {}", itemId, userId);
         return itemService.getById(userId, itemId);
     }
@@ -90,7 +90,7 @@ public class ItemController {
      * @return list of items
      */
     @GetMapping()
-    public List<ItemResponseDto> getListByUser(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemOutDto> getListByUser(@RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("GET-request: получение списка вещей пользователя с id: {}", userId);
         return itemService.getListByUser(userId);
     }
@@ -102,7 +102,7 @@ public class ItemController {
      * @return list of ItemDto objects
      */
     @GetMapping("/search")
-    public List<ItemResponseDto> searchItemsBySubstring(@RequestParam("text") String substring) {
+    public List<ItemOutDto> searchItemsBySubstring(@RequestParam("text") String substring) {
         log.info("GET-request: получение списка доступных к бронированию вещей,"
                 + " содержащих в описании или названии подстроку: {}", substring);
         return itemService.searchItemsBySubstring(substring);
@@ -111,18 +111,18 @@ public class ItemController {
     /**
      * processing POST-request to add comment to a specific item
      *
-     * @param commentRequestDto comment
-     * @param userId            author's id
-     * @param itemId            item's id
+     * @param commentDto comment
+     * @param userId     author's id
+     * @param itemId     item's id
      * @return registered comment with assigned id
      */
     @PostMapping("{itemId}/comment")
     @Validated({Create.class})
-    public CommentResponseDto addComment(@RequestHeader("X-Sharer-User-Id") long userId,
-                                         @Valid @RequestBody CommentRequestDto commentRequestDto,
-                                         @PathVariable long itemId) {
+    public CommentOutDto addComment(@RequestHeader("X-Sharer-User-Id") long userId,
+                                    @Valid @RequestBody CommentDto commentDto,
+                                    @PathVariable long itemId) {
         log.info("POST-request добавление нового отзыва от пользователя {} вещи {}, шаблон отзыва: {}",
-                userId, itemId, commentRequestDto);
-        return itemService.addComment(commentRequestDto, userId, itemId);
+                userId, itemId, commentDto);
+        return itemService.addComment(commentDto, userId, itemId);
     }
 }

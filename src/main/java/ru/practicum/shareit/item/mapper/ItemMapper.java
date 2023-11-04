@@ -1,13 +1,12 @@
 package ru.practicum.shareit.item.mapper;
 
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.booking.dto.BookingItemResponseDto;
-import ru.practicum.shareit.item.dto.CommentResponseDto;
+import ru.practicum.shareit.booking.dto.BookingItemDto;
+import ru.practicum.shareit.item.dto.CommentOutDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.item.dto.ItemOutDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Collections;
@@ -37,13 +36,13 @@ public class ItemMapper {
     }
 
     /**
-     * map ItemDto object into ItemResponseDto object to test
+     * map ItemDto object into ItemOutDto object to test
      *
      * @param itemDto ItemDto object
-     * @return ItemResponseDto object with null empty properties
+     * @return ItemOutDto object with null empty properties
      */
-    public static ItemResponseDto toItemResponseDto(ItemDto itemDto) {
-        return new ItemResponseDto(
+    public static ItemOutDto toItemOutDto(ItemDto itemDto) {
+        return new ItemOutDto(
                 itemDto.getId(),
                 itemDto.getName(),
                 itemDto.getDescription(),
@@ -56,18 +55,18 @@ public class ItemMapper {
     }
 
     /**
-     * map Item object into ItemResponseDto object
+     * map Item object into ItemOutDto object
      *
      * @param item        Item object
      * @param lastBooking lastBooking of item
      * @param nextBooking nextBooking of item
-     * @return ItemResponseDto object with null empty properties
+     * @return ItemOutDto object with null empty properties
      */
-    public static ItemResponseDto toItemResponseDto(Item item,
-                                                    BookingItemResponseDto lastBooking,
-                                                    BookingItemResponseDto nextBooking,
-                                                    List<CommentResponseDto> comments) {
-        return new ItemResponseDto(
+    public static ItemOutDto toItemOutDto(Item item,
+                                          BookingItemDto lastBooking,
+                                          BookingItemDto nextBooking,
+                                          List<CommentOutDto> comments) {
+        return new ItemOutDto(
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
@@ -87,7 +86,7 @@ public class ItemMapper {
      * @return Item object
      */
 
-    public static Item toItem(ItemDto itemDto, User user, @Nullable ItemRequest request) {
+    public static Item toItem(ItemDto itemDto, User user, ItemRequest request) {
         return Item.builder()
                 .id(itemDto.getId())
                 .name(itemDto.getName())

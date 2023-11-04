@@ -4,23 +4,25 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.dto.BookingItemResponseDto;
+import ru.practicum.shareit.booking.dto.BookingItemDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
-import ru.practicum.shareit.booking.repository.BookingJpaRepository;
-import ru.practicum.shareit.item.dto.CommentRequestDto;
-import ru.practicum.shareit.item.dto.CommentResponseDto;
+import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentOutDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.item.dto.ItemOutDto;
 import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.CommentJpaRepository;
-import ru.practicum.shareit.item.repository.ItemJpaRepository;
+import ru.practicum.shareit.item.repository.CommentRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserJpaRepository;
+import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.util.Validation;
 import ru.practicum.shareit.util.exceptions.AccessIsNotAllowedException;
 import ru.practicum.shareit.util.exceptions.ObjectNotFoundException;
@@ -39,14 +41,16 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ItemServiceImpl implements ItemService {
 
-    private final UserJpaRepository userJpaRepository;
-    private final ItemJpaRepository itemJpaRepository;
-    private final BookingJpaRepository bookingJpaRepository;
-    private final CommentJpaRepository commentJpaRepository;
+    private final UserRepository userRepository;
+    private final ItemRepository itemRepository;
+    private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     /**
      * to add item's data (save and assign identity)
      * throws 404.NOT_FOUND ObjectNotFoundException if user doesn't exist
+     * throws 404.NOT_FOUND ObjectNotFoundException if requestId in ItemDto is not null and doesn't exist
      *
      * @param userId  owner's id
      * @param itemDto item to register
@@ -57,9 +61,9 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public ItemDto create(Long userId, @Valid ItemDto itemDto) {
         User owner = getUserByIdIfExists(userId);
-
-        Item item = ItemMapper.toItem(itemDto, owner, null);
-        Item itemWithId = itemJpaRepository.save(item);
+        ItemRequest itemRequest = getItemRequestIfExists(itemDto);
+        Item item = ItemMapper.toItem(itemDto, owner, itemRequest);
+        Item itemWithId = itemRepository.save(item);
         log.info("Зарегистрирована вещь: {}", itemWithId);
         return ItemMapper.toItemDto(itemWithId);
     }
@@ -74,22 +78,22 @@ public class ItemServiceImpl implements ItemService {
      */
     @Override
     @Transactional(readOnly = true)
-    public ItemResponseDto getById(Long userId, Long itemId) {
+    public ItemOutDto getById(Long userId, Long itemId) {
 
         Item item = getItemByIdIfExists(itemId);
 
         LocalDateTime now = LocalDateTime.now();
-        BookingItemResponseDto lastBooking = null;
-        BookingItemResponseDto nextBooking = null;
-        if (item.getOwner().getId().equals(userId)) {
+        BookingItemDto lastBooking = null;
+        BookingItemDto nextBooking = null;
+        if (isOwner(item, userId)) {
             lastBooking = getLastBooking(itemId, now);
             nextBooking = getNextBooking(itemId, now);
         }
 
-        List<CommentResponseDto> commentsDto = getCommentsByItemId(itemId);
-        ItemResponseDto itemResponseDto = ItemMapper.toItemResponseDto(item, lastBooking, nextBooking, commentsDto);
-        log.info("Вещь с id: {} найдена по запросу пользователя с id {}, {}", itemId, userId, itemResponseDto);
-        return itemResponseDto;
+        List<CommentOutDto> commentsDto = getCommentsByItemId(itemId);
+        ItemOutDto itemOutDto = ItemMapper.toItemOutDto(item, lastBooking, nextBooking, commentsDto);
+        log.info("Вещь с id: {} найдена по запросу пользователя с id {}, {}", itemId, userId, itemOutDto);
+        return itemOutDto;
     }
 
 
@@ -114,7 +118,7 @@ public class ItemServiceImpl implements ItemService {
 
         Item updatedItem = updateValidFields(item, itemDto);
 
-        itemJpaRepository.save(updatedItem);
+        itemRepository.save(updatedItem);
         return ItemMapper.toItemDto(updatedItem);
     }
 
@@ -126,9 +130,9 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public void deleteById(Long itemId) {
-        if (itemJpaRepository.existsById(itemId)) {
+        if (itemRepository.existsById(itemId)) {
             log.info("Удалена вещь с id: {}", itemId);
-            itemJpaRepository.deleteById(itemId);
+            itemRepository.deleteById(itemId);
         }
         log.info("Вещи с id: {} не существует", itemId);
     }
@@ -141,11 +145,11 @@ public class ItemServiceImpl implements ItemService {
      */
     @Override
     @Transactional(readOnly = true)
-    public List<ItemResponseDto> getListByUser(Long userId) {
+    public List<ItemOutDto> getListByUser(Long userId) {
 
-        List<Item> items = itemJpaRepository.findAllByOwnerId(userId);
+        List<Item> items = itemRepository.findAllByOwnerId(userId);
         Map<Item, List<Comment>> mapComments = getCommentsToAllItems(items);
-        List<ItemResponseDto> itemsResponses = items.stream()
+        List<ItemOutDto> itemsResponses = items.stream()
                 .map(item -> getItemResponseDto(item,
                         mapComments.getOrDefault(item, Collections.emptyList()),
                         LocalDateTime.now()))
@@ -162,14 +166,14 @@ public class ItemServiceImpl implements ItemService {
      */
     @Override
     @Transactional(readOnly = true)
-    public List<ItemResponseDto> searchItemsBySubstring(String text) {
+    public List<ItemOutDto> searchItemsBySubstring(String text) {
         if (text == null || text.isBlank()) {
             return Collections.emptyList();
         }
 
-        List<Item> items = itemJpaRepository.searchItemsBySubstring(text);
+        List<Item> items = itemRepository.searchItemsBySubstring(text);
         Map<Item, List<Comment>> mapComments = getCommentsToAllItems(items);
-        List<ItemResponseDto> itemsResponses = items.stream()
+        List<ItemOutDto> itemsResponses = items.stream()
                 .map(item -> getItemResponseDto(item,
                         mapComments.getOrDefault(item, Collections.emptyList()),
                         LocalDateTime.now()))
@@ -186,24 +190,24 @@ public class ItemServiceImpl implements ItemService {
      * throws 404.NOT_FOUND AccessIsNotAllowedException if owner tries to comment
      * throws 400.BAD_REQUEST UnavailableItemException if user hadn't approved item's booking before
      *
-     * @param commentRequestDto comment
-     * @param userId            author's id
-     * @param itemId            item's id
+     * @param commentDto comment
+     * @param userId     author's id
+     * @param itemId     item's id
      * @return comment
      */
     @Override
     @Transactional
-    public CommentResponseDto addComment(CommentRequestDto commentRequestDto, Long userId, Long itemId) {
+    public CommentOutDto addComment(CommentDto commentDto, Long userId, Long itemId) {
 
         Item item = getItemByIdIfExists(itemId);
         User user = getUserByIdIfExists(userId);
         checkAccessForOwnerNotAllowed(item, userId);
         checkAccessToCommentAllowed(userId, itemId);
 
-        Comment comment = CommentMapper.toComment(commentRequestDto, user, item);
-        commentJpaRepository.save(comment);
-        log.info("Для вещи c id {} пользователь id {} добавил новый отзыв: {}", itemId, userId, comment);
-        return CommentMapper.toCommentResponseDto(comment);
+        Comment comment = CommentMapper.toComment(commentDto, user, item);
+        Comment commentWithId = commentRepository.save(comment);
+        log.info("Для вещи c id {} пользователь id {} добавил новый отзыв: {}", itemId, userId, commentWithId);
+        return CommentMapper.toCommentOutDto(commentWithId);
     }
 
     /**
@@ -239,7 +243,7 @@ public class ItemServiceImpl implements ItemService {
      * @return User object
      */
     private User getUserByIdIfExists(Long userId) {
-        return userJpaRepository.findById(userId)
+        return userRepository.findById(userId)
                 .orElseThrow(() ->
                         new ObjectNotFoundException(String.format("Пользователя с id %d не существует", userId)));
     }
@@ -252,7 +256,7 @@ public class ItemServiceImpl implements ItemService {
      * @return Item object
      */
     private Item getItemByIdIfExists(Long itemId) {
-        return itemJpaRepository.findById(itemId)
+        return itemRepository.findById(itemId)
                 .orElseThrow(() ->
                         new ObjectNotFoundException(String.format("Вещи с id %d не существует", itemId)));
     }
@@ -264,7 +268,7 @@ public class ItemServiceImpl implements ItemService {
      * @param userId user's id
      */
     private void checkUserExists(Long userId) {
-        if (!userJpaRepository.existsById(userId)) {
+        if (!userRepository.existsById(userId)) {
             throw new ObjectNotFoundException(String.format("Пользователя с id %d не существует", userId));
         }
     }
@@ -280,7 +284,7 @@ public class ItemServiceImpl implements ItemService {
 
     private void checkAccessToCommentAllowed(Long userId, Long itemId) {
         LocalDateTime now = LocalDateTime.now();
-        List<Booking> bookings = bookingJpaRepository
+        List<Booking> bookings = bookingRepository
                 .findAllByItem_IdAndBooker_IdAndStatusAndStartIsBefore(itemId, userId, BookingStatus.APPROVED, now);
         if (bookings.isEmpty()) {
             throw new UnavailableItemException("Вы не вправе оставлять отзывы, "
@@ -331,20 +335,20 @@ public class ItemServiceImpl implements ItemService {
     }
 
     /**
-     * construct and get ItemResponseDto by current time
+     * construct and get ItemOutDto by current time
      *
      * @param item Item
      * @param now  current time
-     * @return ItemResponseDto object
+     * @return ItemOutDto object
      */
-    private ItemResponseDto getItemResponseDto(Item item, List<Comment> comments, LocalDateTime now) {
+    private ItemOutDto getItemResponseDto(Item item, List<Comment> comments, LocalDateTime now) {
 
         Long itemId = item.getId();
-        BookingItemResponseDto lastBooking = getLastBooking(itemId, now);
-        BookingItemResponseDto nextBooking = getNextBooking(itemId, now);
-        List<CommentResponseDto> commentsDto = CommentMapper.toCommentResponseDtoList(comments);
+        BookingItemDto lastBooking = getLastBooking(itemId, now);
+        BookingItemDto nextBooking = getNextBooking(itemId, now);
+        List<CommentOutDto> commentsDto = CommentMapper.toCommentOutDtoList(comments);
 
-        return ItemMapper.toItemResponseDto(item, lastBooking, nextBooking, commentsDto);
+        return ItemMapper.toItemOutDto(item, lastBooking, nextBooking, commentsDto);
     }
 
     /**
@@ -355,25 +359,25 @@ public class ItemServiceImpl implements ItemService {
      */
     private Map<Item, List<Comment>> getCommentsToAllItems(List<Item> items) {
 
-        List<Comment> comments = commentJpaRepository.findAllByItemIn(items);
+        List<Comment> comments = commentRepository.findAllByItemIn(items);
         return comments.stream()
                 .collect(Collectors.groupingBy(Comment::getItem));
     }
+
 
     /**
      * get item's lastBooking relating to a specified time
      *
      * @param itemId item's id
      * @param now    current time
-     * @return BookingItemResponseDto object or null result
+     * @return BookingItemDto object or null result
      */
-    private BookingItemResponseDto getLastBooking(Long itemId, LocalDateTime now) {
-        return bookingJpaRepository
+    private BookingItemDto getLastBooking(Long itemId, LocalDateTime now) {
+        return bookingRepository
                 .findFirstByItemIdAndStatusAndStartIsBeforeOrStartEqualsOrderByEndDesc(itemId,
                         BookingStatus.APPROVED, now, now)
-                .map(BookingMapper::toBookingItemResponseDto)
+                .map(BookingMapper::toBookingItemDto)
                 .orElse(null);
-
     }
 
     /**
@@ -381,13 +385,13 @@ public class ItemServiceImpl implements ItemService {
      *
      * @param itemId item's id
      * @param now    current time
-     * @return BookingItemResponseDto object or null result
+     * @return BookingItemDto object or null result
      */
-    private BookingItemResponseDto getNextBooking(Long itemId, LocalDateTime now) {
-        return bookingJpaRepository
+    private BookingItemDto getNextBooking(Long itemId, LocalDateTime now) {
+        return bookingRepository
                 .findFirstByItemIdAndStatusAndStartIsAfterOrStartEqualsOrderByStart(itemId,
                         BookingStatus.APPROVED, now, now)
-                .map(BookingMapper::toBookingItemResponseDto)
+                .map(BookingMapper::toBookingItemDto)
                 .orElse(null);
     }
 
@@ -396,9 +400,9 @@ public class ItemServiceImpl implements ItemService {
      *
      * @param items list of items
      */
-    private void logResultList(List<ItemResponseDto> items) {
+    private void logResultList(List<ItemOutDto> items) {
         String result = items.stream()
-                .map(ItemResponseDto::toString)
+                .map(ItemOutDto::toString)
                 .collect(Collectors.joining(", "));
         log.info("Список вещей по запросу: {}", result);
 
@@ -410,9 +414,26 @@ public class ItemServiceImpl implements ItemService {
      * @param itemId item's id
      * @return list of comments or empty list
      */
-    private List<CommentResponseDto> getCommentsByItemId(Long itemId) {
-        List<Comment> comments = commentJpaRepository.findAllByItemId(itemId);
-        return CommentMapper.toCommentResponseDtoList(comments);
+    private List<CommentOutDto> getCommentsByItemId(Long itemId) {
+        List<Comment> comments = commentRepository.findAllByItemId(itemId);
+        return CommentMapper.toCommentOutDtoList(comments);
+    }
+
+    /**
+     * get if exists ItemRequest
+     * throws 404.NOT FOUND ObjectNotFoundException if isn't
+     *
+     * @param itemDto itemDto object
+     * @return ItemRequest or null
+     */
+    private ItemRequest getItemRequestIfExists(ItemDto itemDto) {
+        if (itemDto.getRequestId() == null) {
+            return null;
+        }
+        Long requestId = itemDto.getRequestId();
+        return itemRequestRepository.findById(requestId)
+                .orElseThrow(() ->
+                        new ObjectNotFoundException(String.format("Запроса с id %d не существует", requestId)));
     }
 
 

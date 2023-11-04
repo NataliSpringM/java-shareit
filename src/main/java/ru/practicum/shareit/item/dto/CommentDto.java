@@ -10,12 +10,12 @@ import javax.validation.constraints.NotNull;
 
 /**
  * Sprint add-bookings.
- * CommentRequestDto model.
+ * CommentDto model.
  */
 @Value
 @Builder(toBuilder = true)
 @RequiredArgsConstructor
-public class CommentRequestDto {
+public class CommentDto {
     Long id;
     @NotNull(groups = {Create.class})
     @NotBlank(groups = {Create.class})

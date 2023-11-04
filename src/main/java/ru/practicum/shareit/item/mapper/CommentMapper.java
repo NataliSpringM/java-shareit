@@ -1,8 +1,8 @@
 package ru.practicum.shareit.item.mapper;
 
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.item.dto.CommentRequestDto;
-import ru.practicum.shareit.item.dto.CommentResponseDto;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentOutDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
@@ -21,10 +21,10 @@ public class CommentMapper {
      * map Comment object into CommentDto object
      *
      * @param comment Comment object
-     * @return Comment Dto object
+     * @return CommentOutDto object
      */
-    public static CommentResponseDto toCommentResponseDto(Comment comment) {
-        return CommentResponseDto.builder()
+    public static CommentOutDto toCommentOutDto(Comment comment) {
+        return CommentOutDto.builder()
                 .id(comment.getId())
                 .text(comment.getText())
                 .authorName(comment.getAuthor() != null ? comment.getAuthor().getName() : null)
@@ -35,17 +35,34 @@ public class CommentMapper {
     }
 
     /**
-     * map CommentRequestDto object into Comment object
+     * map Comment object into CommentDto object to test
      *
-     * @param commentRequestDto CommentRequestDto object
-     * @param item              Item object
-     * @param user              User object
+     * @param commentDto CommentDto object
+     * @return CommentOutDto object
+     */
+    public static CommentOutDto toCommentOutDto(CommentDto commentDto) {
+        return CommentOutDto.builder()
+                .id(commentDto.getId())
+                .text(commentDto.getText())
+                .authorName(commentDto.getAuthorName())
+                .itemId(commentDto.getItemId())
+                .created(LocalDateTime.now())
+                .build();
+
+    }
+
+    /**
+     * map CommentDto object into Comment object
+     *
+     * @param commentDto CommentDto object
+     * @param item       Item object
+     * @param user       User object
      * @return Comment object
      */
-    public static Comment toComment(CommentRequestDto commentRequestDto, User user, Item item) {
+    public static Comment toComment(CommentDto commentDto, User user, Item item) {
         return Comment.builder()
-                .id(commentRequestDto.getId())
-                .text(commentRequestDto.getText())
+                .id(commentDto.getId())
+                .text(commentDto.getText())
                 .author(user)
                 .item(item)
                 .created(LocalDateTime.now())
@@ -59,8 +76,8 @@ public class CommentMapper {
      * @return List of CommentDto objects
      */
 
-    public static List<CommentResponseDto> toCommentResponseDtoList(List<Comment> comments) {
-        return comments.stream().map(CommentMapper::toCommentResponseDto).collect(Collectors.toList());
+    public static List<CommentOutDto> toCommentOutDtoList(List<Comment> comments) {
+        return comments.stream().map(CommentMapper::toCommentOutDto).collect(Collectors.toList());
     }
 
 }
