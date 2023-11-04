@@ -581,10 +581,10 @@ public class ItemRequestServiceImplTest {
         List<ItemRequestOutDto> expectedItemRequests = List.of(expectedItemRequest1, expectedItemRequest2);
 
         //create page param
-        int from = 0;
+        int from = 10;
         int size = 10;
 
-        PageRequest page = PageRequest.of(0, 10);
+        PageRequest page = PageRequest.of(from / size, size);
 
         //mock repository answers
         when(userRepository.existsById(ownerId)).thenReturn(true);
