@@ -580,12 +580,12 @@ public class ItemRequestServiceImplTest {
         //create expected List of itemRequests with items
         List<ItemRequestOutDto> expectedItemRequests = List.of(expectedItemRequest1, expectedItemRequest2);
 
-        // create page parameters
+        //create page param
         int from = 10;
         int size = 10;
         PageRequest page = PageRequest.of(from/size, size);
-        
-        //mock repository answer
+
+        //mock repository answers
         when(userRepository.existsById(ownerId)).thenReturn(true);
         when(itemRequestRepository.findAllByRequesterIdIsNotOrderByCreatedDesc(ownerId, page))
                 .thenReturn(itemRequests);
