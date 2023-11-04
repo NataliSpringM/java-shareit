@@ -584,7 +584,7 @@ public class ItemRequestServiceImplTest {
         int from = 0;
         int size = 10;
 
-        PageRequest page = PageRequest.of(0, 10);
+        PageRequest page = PageRequest.of(from / size, size);
 
         //mock repository answers
         when(userRepository.existsById(ownerId)).thenReturn(true);
