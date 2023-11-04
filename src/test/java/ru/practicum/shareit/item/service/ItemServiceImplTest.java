@@ -399,13 +399,13 @@ public class ItemServiceImplTest {
         Long lastBookingId = 1L;
         Booking lastBooking = Booking.builder()
                 .id(lastBookingId)
-                .booker(notOwner).
-                build();
+                .booker(notOwner)
+                .build();
         Long nextBookingId = 2L;
         Booking nextBooking = Booking.builder()
                 .id(nextBookingId)
-                .booker(notOwner).
-                build();
+                .booker(notOwner)
+                .build();
         BookingItemDto lastBookingDto = BookingMapper.toBookingItemDto(lastBooking);
         BookingItemDto nextBookingDto = BookingMapper.toBookingItemDto(nextBooking);
 
@@ -1459,13 +1459,13 @@ public class ItemServiceImplTest {
         Long lastBookingId = 1L;
         Booking lastBooking = Booking.builder()
                 .id(lastBookingId)
-                .booker(notOwner).
-                build();
+                .booker(notOwner)
+                .build();
         Long nextBookingId = 2L;
         Booking nextBooking = Booking.builder()
                 .id(nextBookingId)
-                .booker(notOwner).
-                build();
+                .booker(notOwner)
+                .build();
         BookingItemDto lastBookingDto = BookingMapper.toBookingItemDto(lastBooking);
         BookingItemDto nextBookingDto = BookingMapper.toBookingItemDto(nextBooking);
 
@@ -1636,13 +1636,13 @@ public class ItemServiceImplTest {
         Long lastBookingId = 1L;
         Booking lastBooking = Booking.builder()
                 .id(lastBookingId)
-                .booker(notOwner).
-                build();
+                .booker(notOwner)
+                .build();
         Long nextBookingId = 2L;
         Booking nextBooking = Booking.builder()
                 .id(nextBookingId)
-                .booker(notOwner).
-                build();
+                .booker(notOwner)
+                .build();
 
         //create comments to item
         Long commentId = 1L;

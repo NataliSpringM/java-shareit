@@ -321,8 +321,8 @@ public class BookingRepositoryTest {
 
         LocalDateTime now = LocalDateTime.now();
 
-        Optional<Booking> lastBooking = bookingRepository.
-                findFirstByItemIdAndStatusAndStartIsBeforeOrStartEqualsOrderByEndDesc(itemId,
+        Optional<Booking> lastBooking = bookingRepository
+                .findFirstByItemIdAndStatusAndStartIsBeforeOrStartEqualsOrderByEndDesc(itemId,
                         BookingStatus.APPROVED, now, now);
 
         AssertionsForClassTypes.assertThat(lastBooking).hasValueSatisfying(booking -> assertThat(booking)
@@ -342,8 +342,8 @@ public class BookingRepositoryTest {
 
         LocalDateTime now = LocalDateTime.now();
 
-        Optional<Booking> lastBooking = bookingRepository.
-                findFirstByItemIdAndStatusAndStartIsAfterOrStartEqualsOrderByStart(itemId,
+        Optional<Booking> lastBooking = bookingRepository
+                .findFirstByItemIdAndStatusAndStartIsAfterOrStartEqualsOrderByStart(itemId,
                         BookingStatus.APPROVED, now, now);
 
         AssertionsForClassTypes.assertThat(lastBooking).hasValueSatisfying(booking -> assertThat(booking)

@@ -168,6 +168,7 @@ public class ItemRepositoryTest {
                 .contains(item2);
 
     }
+
     /**
      * delete records in database
      */
