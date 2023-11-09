@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserJpaRepository;
+import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.util.Validation;
 import ru.practicum.shareit.util.exceptions.ConflictEmailException;
 import ru.practicum.shareit.util.exceptions.ObjectNotFoundException;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
-    private final UserJpaRepository userJpaRepository;
+    private final UserRepository userRepository;
 
     /**
      * to add user's data (save and assign identity)
@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
     public UserDto create(UserDto userDto) {
 
         User user = UserMapper.toUser(userDto);
-        User userWithId = userJpaRepository.save(user);
+        User userWithId = userRepository.save(user);
         log.info("Создан пользователь: {} ", userWithId);
         return UserMapper.toUserDto(userWithId);
     }
@@ -69,7 +69,7 @@ public class UserServiceImpl implements UserService {
     public UserDto update(UserDto userDto, Long userId) {
 
         User user = updateValidFields(userDto, userId);
-        userJpaRepository.save(user);
+        userRepository.save(user);
         log.info("Обновлены данные пользователя с id: {}, {}", user.getId(), user);
         return UserMapper.toUserDto(user);
     }
@@ -82,9 +82,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteById(Long userId) {
-        if (userJpaRepository.existsById(userId)) {
+        if (userRepository.existsById(userId)) {
             log.info("Удален пользователь с id: {}", userId);
-            userJpaRepository.deleteById(userId);
+            userRepository.deleteById(userId);
         }
         log.info("Пользователь с id {} не найден", userId);
     }
@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public List<UserDto> findAll() {
-        List<User> users = userJpaRepository.findAll();
+        List<User> users = userRepository.findAll();
         List<UserDto> usersDto = UserMapper.toUserDtoList(users);
         logResultList(usersDto);
         return usersDto;
@@ -136,9 +136,7 @@ public class UserServiceImpl implements UserService {
      */
     private void checkEmailExists(String email, Long userId) {
 
-        Optional<User> userWithSameEmail = userJpaRepository.findAll().stream()
-                .filter(user -> user.getEmail().equals(email) && !user.getId().equals(userId))
-                .findAny();
+        Optional<User> userWithSameEmail = userRepository.findByEmailAndIdIsNot(email, userId);
 
         if (userWithSameEmail.isPresent()) {
             log.info("Email {} уже зарегистрирован в базе.", email);
@@ -153,7 +151,7 @@ public class UserServiceImpl implements UserService {
      * @return User object
      */
     private User getUserByIdIfExists(Long userId) {
-        return userJpaRepository.findById(userId)
+        return userRepository.findById(userId)
                 .orElseThrow(() ->
                         new ObjectNotFoundException(String.format("Пользователя с id %d не существует", userId)));
     }

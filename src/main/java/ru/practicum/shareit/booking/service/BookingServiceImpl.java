@@ -2,18 +2,20 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.dto.BookingRequestDto;
-import ru.practicum.shareit.booking.dto.BookingResponseDto;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingOutDto;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
-import ru.practicum.shareit.booking.repository.BookingJpaRepository;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.ItemJpaRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserJpaRepository;
+import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.util.exceptions.*;
 
 
@@ -30,9 +32,9 @@ import java.util.List;
 @Slf4j
 public class BookingServiceImpl implements BookingService {
 
-    private final BookingJpaRepository bookingJpaRepository;
-    private final ItemJpaRepository itemJpaRepository;
-    private final UserJpaRepository userJpaRepository;
+    private final BookingRepository bookingRepository;
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
 
     /**
      * create (save and assign identity) booking, booking is not allowed for item's owner
@@ -42,31 +44,31 @@ public class BookingServiceImpl implements BookingService {
      * throws 404.NOT FOUND ObjectNotFoundException if user is not found
      * throws 404.NOT_FOUND AccessIsNotAllowedException if owner try booking
      *
-     * @param userId            owner's id
-     * @param bookingRequestDto booking to save and register
+     * @param userId     owner's id
+     * @param bookingDto booking to save and register
      * @return booking with assigned id
      */
     @Override
     @Transactional
-    public BookingResponseDto create(Long userId, BookingRequestDto bookingRequestDto) {
+    public BookingOutDto create(Long userId, BookingDto bookingDto) {
 
-        checkValidDateAndTime(bookingRequestDto.getStart(), bookingRequestDto.getEnd());
-        Item item = getItemByIdIfExists(bookingRequestDto.getItemId());
+        checkValidDateAndTime(bookingDto.getStart(), bookingDto.getEnd());
+        Item item = getItemByIdIfExists(bookingDto.getItemId());
         checkIsItemAvailable(item);
-        User owner = getUserByIdIfExists(userId);
+        User user = getUserByIdIfExists(userId);
         checkAccessForOwnerNotAllowed(item, userId);
 
-        Booking booking = BookingMapper.toBooking(bookingRequestDto, owner, item,
+        Booking booking = BookingMapper.toBooking(bookingDto, user, item,
                 BookingStatus.WAITING);
-        Booking bookingWithId = bookingJpaRepository.save(booking);
+        Booking bookingWithId = bookingRepository.save(booking);
         log.info("Произведено бронирование: {}", bookingWithId);
-        return BookingMapper.toBookingResponseDto(bookingWithId);
+        return BookingMapper.toBookingOutDto(bookingWithId);
     }
 
     /**
      * get booking by booking's id for owner or booker
      * throws 404.NOT FOUND ObjectNotFoundException if booking is not found
-     * throws 400.NOT_FOUND AccessIsNotAllowedException if user is not item's owner or booker
+     * throws 400.BAD REQUEST AccessIsNotAllowedException if user is not item's owner or booker
      *
      * @param userId    user's id
      * @param bookingId booking's id
@@ -74,19 +76,22 @@ public class BookingServiceImpl implements BookingService {
      */
     @Override
     @Transactional(readOnly = true)
-    public BookingResponseDto getById(Long userId, Long bookingId) {
+    public BookingOutDto getById(Long userId, Long bookingId) {
 
         Booking booking = getBookingByIdIfExists(bookingId);
         checkAccessAllowedOnlyForOwnerOrBooker(booking, userId);
 
-        BookingResponseDto bookingResponseDto = BookingMapper.toBookingResponseDto(booking);
-        log.info("Пользователю с id {} предоставлена информация о бронировании {}", userId, bookingResponseDto);
-        return bookingResponseDto;
+        BookingOutDto bookingOutDto = BookingMapper.toBookingOutDto(booking);
+        log.info("Пользователю с id {} предоставлена информация о бронировании {}", userId, bookingOutDto);
+        return bookingOutDto;
     }
 
     /**
      * set APPROVE or REJECTED BookingStatus for booking. Updating of status is allowed only for item's owner
-     * throws
+     * throws 404.NOT FOUND ObjectNotFoundException if user is not found
+     * throws 404.NOT FOUND ObjectNotFoundException if booking is not found
+     * throws 404.NOT_FOUND AccessIsNotAllowedException if user is not item's owner
+     * throws 400.BAD_REQUEST UnavailableItemException if status is not WAITING
      *
      * @param bookingId booking's id
      * @param userId    user's id
@@ -95,7 +100,7 @@ public class BookingServiceImpl implements BookingService {
      */
     @Override
     @Transactional
-    public BookingResponseDto updateStatus(Long bookingId, Long userId, Boolean approved) {
+    public BookingOutDto updateStatus(Long bookingId, Long userId, Boolean approved) {
 
         checkUserExists(userId);
         Booking booking = getBookingByIdIfExists(bookingId);
@@ -104,15 +109,16 @@ public class BookingServiceImpl implements BookingService {
 
         BookingStatus status = resolveStatus(approved);
         Booking updated = booking.toBuilder().status(status).build();
-        bookingJpaRepository.save(updated);
-        BookingResponseDto bookingResponseDto = BookingMapper.toBookingResponseDto(updated);
-        log.info("Бронирование {} получило статус {}", bookingResponseDto, status);
-        return bookingResponseDto;
+        bookingRepository.save(updated);
+        BookingOutDto bookingOutDto = BookingMapper.toBookingOutDto(updated);
+        log.info("Бронирование {} получило статус {}", bookingOutDto, status);
+        return bookingOutDto;
     }
 
     /**
      * find if exists list of booking by owner's id, sorting by start value, starting with new
      * by state (default = ALL)
+     * with paging option: the size and the number of the page is defined by from/size parameters of request
      * throws 404.NOT_FOUND ObjectNotFoundException if user doesn't exist
      * throws 400.BAD_REQUEST UnsupportedStatusException if state is not BookingStatus
      *
@@ -121,47 +127,54 @@ public class BookingServiceImpl implements BookingService {
      */
     @Override
     @Transactional(readOnly = true)
-    public List<BookingResponseDto> getListByOwner(Long ownerId, String state) {
+    public List<BookingOutDto> getListByOwner(Long ownerId, String state, Integer from, Integer size) {
 
         checkUserExists(ownerId);
         BookingState validState = getValidBookingStateOrElseThrow(state);
         LocalDateTime now = LocalDateTime.now();
+        int page = from / size;
+        Pageable pageRequest = PageRequest.of(page, size);
+
         List<Booking> listByOwner;
 
         switch (validState) {
             case ALL:
-                listByOwner = bookingJpaRepository.findAllByItem_Owner_IdOrderByStartDesc(ownerId);
+                listByOwner = bookingRepository.findAllByItem_Owner_IdOrderByStartDesc(ownerId, pageRequest);
                 break;
             case CURRENT:
-                listByOwner = bookingJpaRepository
-                        .findAllByItem_Owner_IdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(ownerId, now, now);
+                listByOwner = bookingRepository
+                        .findAllByItem_Owner_IdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(ownerId, now, now,
+                                pageRequest);
                 break;
             case PAST:
-                listByOwner = bookingJpaRepository.findAllByItem_Owner_IdAndEndIsBeforeOrderByStartDesc(ownerId, now);
+                listByOwner = bookingRepository.findAllByItem_Owner_IdAndEndIsBeforeOrderByStartDesc(ownerId, now,
+                        pageRequest);
                 break;
             case FUTURE:
-                listByOwner = bookingJpaRepository.findAllByItem_Owner_IdAndStartIsAfterOrderByStartDesc(ownerId, now);
+                listByOwner = bookingRepository.findAllByItem_Owner_IdAndStartIsAfterOrderByStartDesc(ownerId, now,
+                        pageRequest);
                 break;
             case REJECTED:
                 List<BookingStatus> notApprovedStatus = List.of(BookingStatus.REJECTED, BookingStatus.CANCELED);
-                listByOwner = bookingJpaRepository
-                        .findAllByItem_Owner_IdAndStatusInOrderByStartDesc(ownerId, notApprovedStatus);
+                listByOwner = bookingRepository
+                        .findAllByItem_Owner_IdAndStatusInOrderByStartDesc(ownerId, notApprovedStatus, pageRequest);
                 break;
             case WAITING:
-                listByOwner = bookingJpaRepository
+                listByOwner = bookingRepository
                         .findAllByItem_Owner_IdAndStatusOrderByStartDesc(ownerId,
-                                BookingStatus.valueOf("WAITING"));
+                                BookingStatus.valueOf("WAITING"), pageRequest);
                 break;
             default:
                 throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
         }
 
-        return BookingMapper.toBookingResponseDtoList(listByOwner);
+        return BookingMapper.toBookingOutDtoList(listByOwner);
     }
 
     /**
      * find if exists list of booking by user's id, sorting by start value, starting with new
      * by state (default = ALL)
+     * with paging option: the size and the number of the page is defined by from/size parameters of request
      * throws 404.NOT_FOUND ObjectNotFoundException if user doesn't exist
      * throws 400.BAD_REQUEST UnsupportedStatusException if state is not BookingStatus
      *
@@ -170,40 +183,47 @@ public class BookingServiceImpl implements BookingService {
      */
     @Override
     @Transactional(readOnly = true)
-    public List<BookingResponseDto> getListByBooker(Long bookerId, String state) {
+    public List<BookingOutDto> getListByBooker(Long bookerId, String state, Integer from, Integer size) {
 
         checkUserExists(bookerId);
         BookingState validState = getValidBookingStateOrElseThrow(state);
         LocalDateTime now = LocalDateTime.now();
+        int page = from / size;
+        Pageable pageRequest = PageRequest.of(page, size);
+
         List<Booking> listByBooker;
 
         switch (validState) {
             case ALL:
-                listByBooker = bookingJpaRepository.findAllByBookerIdOrderByStartDesc(bookerId);
+                listByBooker = bookingRepository.findAllByBookerIdOrderByStartDesc(bookerId, pageRequest);
                 break;
             case CURRENT:
-                listByBooker = bookingJpaRepository
-                        .findAllByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(bookerId, now, now);
+                listByBooker = bookingRepository
+                        .findAllByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(bookerId, now, now,
+                                pageRequest);
                 break;
             case PAST:
-                listByBooker = bookingJpaRepository.findAllByBookerIdAndEndIsBeforeOrderByStartDesc(bookerId, now);
+                listByBooker = bookingRepository.findAllByBookerIdAndEndIsBeforeOrderByStartDesc(bookerId, now,
+                        pageRequest);
                 break;
             case FUTURE:
-                listByBooker = bookingJpaRepository.findAllByBookerIdAndStartIsAfterOrderByStartDesc(bookerId, now);
+                listByBooker = bookingRepository.findAllByBookerIdAndStartIsAfterOrderByStartDesc(bookerId, now,
+                        pageRequest);
                 break;
             case REJECTED:
                 List<BookingStatus> notApprovedStatus = List.of(BookingStatus.REJECTED, BookingStatus.CANCELED);
-                listByBooker = bookingJpaRepository
-                        .findAllByBookerIdAndStatusInOrderByStartDesc(bookerId, notApprovedStatus);
+                listByBooker = bookingRepository
+                        .findAllByBookerIdAndStatusInOrderByStartDesc(bookerId, notApprovedStatus, pageRequest);
                 break;
             case WAITING:
-                listByBooker = bookingJpaRepository
-                        .findAllByBookerIdAndStatusOrderByStartDesc(bookerId, BookingStatus.valueOf("WAITING"));
+                listByBooker = bookingRepository
+                        .findAllByBookerIdAndStatusOrderByStartDesc(bookerId, BookingStatus.valueOf("WAITING"),
+                                pageRequest);
                 break;
             default:
                 throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
         }
-        return BookingMapper.toBookingResponseDtoList(listByBooker);
+        return BookingMapper.toBookingOutDtoList(listByBooker);
 
     }
 
@@ -241,7 +261,7 @@ public class BookingServiceImpl implements BookingService {
      * @return Item object
      */
     private Item getItemByIdIfExists(Long itemId) {
-        return itemJpaRepository.findById(itemId)
+        return itemRepository.findById(itemId)
                 .orElseThrow(() ->
                         new ObjectNotFoundException(String.format("Вещи с id %d не существует", itemId)));
     }
@@ -253,7 +273,7 @@ public class BookingServiceImpl implements BookingService {
      * @return Booking object
      */
     private Booking getBookingByIdIfExists(Long bookingId) {
-        return bookingJpaRepository.findById(bookingId)
+        return bookingRepository.findById(bookingId)
                 .orElseThrow(() ->
                         new ObjectNotFoundException(String.format("Бронирования с id %d не существует", bookingId)));
     }
@@ -265,7 +285,7 @@ public class BookingServiceImpl implements BookingService {
      * @return User object
      */
     private User getUserByIdIfExists(Long userId) {
-        return userJpaRepository.findById(userId)
+        return userRepository.findById(userId)
                 .orElseThrow(() ->
                         new ObjectNotFoundException(String.format("Пользователя с id %d не существует", userId)));
     }
@@ -276,7 +296,7 @@ public class BookingServiceImpl implements BookingService {
      * @param userId user's id
      */
     private void checkUserExists(Long userId) {
-        if (!userJpaRepository.existsById(userId)) {
+        if (!userRepository.existsById(userId)) {
             throw new ObjectNotFoundException(String.format("Пользователя с id %d не существует", userId));
         }
     }
@@ -309,7 +329,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     /**
-     * check whether user is item's owner or booker, throws 400.NOT_FOUND AccessIsNotAllowedException if isn't
+     * check whether user is item's owner or booker
+     * throws 404.NOT_FOUND AccessIsNotAllowedException if isn't
      *
      * @param booking Booking booking
      * @param userId  user's id
@@ -324,7 +345,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     /**
-     * check whether state is valid BookingState, throws 400.BAD_REQUEST UnsupportedStatusException if isn't
+     * check whether state is valid BookingState
+     * throws 400.BAD_REQUEST UnsupportedStatusException if isn't
      *
      * @param state String state
      */
@@ -351,7 +373,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     /**
-     * check whether booking has status WAITING, throws 400.BAD_REQUEST UnavailableItemException if isn't
+     * check whether booking has status WAITING
+     * throws 400.BAD_REQUEST UnavailableItemException if isn't
      *
      * @param booking Booking booking
      */

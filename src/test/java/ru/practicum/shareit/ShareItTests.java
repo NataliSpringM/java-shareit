@@ -9,15 +9,15 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.validation.annotation.Validated;
 import ru.practicum.shareit.booking.BookingController;
-import ru.practicum.shareit.booking.dto.BookingItemResponseDto;
-import ru.practicum.shareit.booking.dto.BookingRequestDto;
-import ru.practicum.shareit.booking.dto.BookingResponseDto;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingItemDto;
+import ru.practicum.shareit.booking.dto.BookingOutDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.item.ItemController;
-import ru.practicum.shareit.item.dto.CommentRequestDto;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.item.dto.ItemOutDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserController;
@@ -66,18 +66,18 @@ class ShareItTests {
     ItemDto onlyDescription;
     ItemDto onlyName;
 
-    BookingRequestDto bookingItem1Future;
-    BookingRequestDto bookingItem1Future2;
-    BookingRequestDto bookingItem1Future3;
-    BookingRequestDto bookingInvalidStartInPast;
-    BookingRequestDto bookingInvalidStartEqualsEnd;
-    BookingRequestDto bookingInvalidEndInPast;
-    BookingRequestDto bookingInvalidEndBeforeStart;
-    BookingRequestDto bookingItem2;
-    CommentRequestDto commentToItem1First;
-    CommentRequestDto commentToItem2;
-    CommentRequestDto commentWithEmptyText;
-    CommentRequestDto commentWithoutText;
+    BookingDto bookingItem1Future;
+    BookingDto bookingItem1Future2;
+    BookingDto bookingItem1Future3;
+    BookingDto bookingInvalidStartInPast;
+    BookingDto bookingInvalidStartEqualsEnd;
+    BookingDto bookingInvalidEndInPast;
+    BookingDto bookingInvalidEndBeforeStart;
+    BookingDto bookingItem2;
+    CommentDto commentToItem1First;
+    CommentDto commentToItem2;
+    CommentDto commentWithEmptyText;
+    CommentDto commentWithoutText;
     Long nonExistingId;
 
     ShareItTests() {
@@ -106,45 +106,45 @@ class ShareItTests {
         onlyAvailable = ItemDto.builder().available(false).build();
         onlyDescription = ItemDto.builder().description("patched description").build();
         onlyName = ItemDto.builder().name("updated").build();
-        bookingItem1Future = BookingRequestDto.builder().itemId(1L)
-                .start(LocalDateTime.of(2024, 1, 2, 20, 11, 11))
-                .end(LocalDateTime.of(2024, 2, 1, 1, 1, 1))
+        bookingItem1Future = BookingDto.builder().itemId(1L)
+                .start(LocalDateTime.of(2030, 1, 2, 20, 11, 11))
+                .end(LocalDateTime.of(2030, 2, 1, 1, 1, 1))
                 .build();
-        bookingItem1Future2 = BookingRequestDto.builder().itemId(1L)
-                .start(LocalDateTime.of(2024, 2, 2, 20, 11, 11))
-                .end(LocalDateTime.of(2024, 3, 1, 1, 1, 1))
+        bookingItem1Future2 = BookingDto.builder().itemId(1L)
+                .start(LocalDateTime.of(2030, 2, 2, 20, 11, 11))
+                .end(LocalDateTime.of(2030, 3, 1, 1, 1, 1))
                 .build();
-        bookingItem1Future3 = BookingRequestDto.builder().itemId(1L)
-                .start(LocalDateTime.of(2024, 4, 2, 20, 11, 11))
-                .end(LocalDateTime.of(2024, 4, 3, 1, 1, 1))
+        bookingItem1Future3 = BookingDto.builder().itemId(1L)
+                .start(LocalDateTime.of(2030, 4, 2, 20, 11, 11))
+                .end(LocalDateTime.of(2030, 4, 3, 1, 1, 1))
                 .build();
-        bookingItem2 = BookingRequestDto.builder().itemId(2L)
-                .start(LocalDateTime.of(2023, 11, 1, 1, 1, 1))
-                .end(LocalDateTime.of(2023, 11, 2, 1, 1, 1))
+        bookingItem2 = BookingDto.builder().itemId(2L)
+                .start(LocalDateTime.of(2030, 1, 1, 1, 1, 1))
+                .end(LocalDateTime.of(2030, 1, 2, 1, 1, 1))
                 .build();
-        bookingInvalidStartEqualsEnd = BookingRequestDto.builder().itemId(1L)
-                .start(LocalDateTime.of(2024, 4, 2, 20, 11, 11))
-                .end(LocalDateTime.of(2024, 4, 2, 20, 11, 11))
+        bookingInvalidStartEqualsEnd = BookingDto.builder().itemId(1L)
+                .start(LocalDateTime.of(2030, 4, 2, 20, 11, 11))
+                .end(LocalDateTime.of(2030, 4, 2, 20, 11, 11))
                 .build();
-        bookingInvalidEndBeforeStart = BookingRequestDto.builder().itemId(1L)
-                .start(LocalDateTime.of(2024, 1, 1, 1, 1, 1))
-                .end(LocalDateTime.of(2023, 12, 1, 1, 1, 1))
+        bookingInvalidEndBeforeStart = BookingDto.builder().itemId(1L)
+                .start(LocalDateTime.of(2030, 12, 1, 1, 1, 1))
+                .end(LocalDateTime.of(2030, 1, 1, 1, 1, 1))
                 .build();
-        bookingInvalidStartInPast = BookingRequestDto.builder().itemId(1L)
+        bookingInvalidStartInPast = BookingDto.builder().itemId(1L)
                 .start(LocalDateTime.now().minusYears(1))
                 .end(LocalDateTime.now())
                 .build();
-        bookingInvalidEndInPast = BookingRequestDto.builder().itemId(1L)
+        bookingInvalidEndInPast = BookingDto.builder().itemId(1L)
                 .start(LocalDateTime.now().minusYears(3))
                 .start(LocalDateTime.now().minusYears(1))
                 .build();
-        commentToItem1First = CommentRequestDto
+        commentToItem1First = CommentDto
                 .builder().itemId(1L).authorName("Alexey Petrov").text("I like it").build();
-        commentToItem2 = CommentRequestDto
+        commentToItem2 = CommentDto
                 .builder().itemId(2L).authorName("Alexey Petrov").text("Don't use it").build();
-        commentWithoutText = CommentRequestDto
+        commentWithoutText = CommentDto
                 .builder().itemId(2L).authorName("Alexey Petrov").build();
-        commentWithEmptyText = CommentRequestDto
+        commentWithEmptyText = CommentDto
                 .builder().itemId(2L).authorName("Alexey Petrov").text(" ").build();
         nonExistingId = -1L;
 
@@ -379,10 +379,10 @@ class ShareItTests {
         ItemDto itemDto = itemController.create(ownerId, screwDriver);
         bookingController.create(bookerId, bookingItem1Future);
         Long bookingId = userDto.getId();
-        BookingResponseDto bookingApproved = bookingController.updateStatus(ownerId, bookingId, true);
-        BookingItemResponseDto bookingItem = BookingMapper.toBookingItemResponseDto(bookingApproved);
+        BookingOutDto bookingApproved = bookingController.updateStatus(ownerId, bookingId, true);
+        BookingItemDto bookingItem = BookingMapper.toBookingItemDto(bookingApproved);
 
-        Optional<ItemResponseDto> itemOptional = Optional.ofNullable(itemController.getById(ownerId, itemDto.getId()));
+        Optional<ItemOutDto> itemOptional = Optional.ofNullable(itemController.getById(ownerId, itemDto.getId()));
         assertThat(itemOptional).hasValueSatisfying(i -> assertThat(i)
                 .hasFieldOrPropertyWithValue("id", i.getId())
                 .hasFieldOrPropertyWithValue("description", "new")
@@ -504,7 +504,7 @@ class ShareItTests {
         ItemDto updatedDescriptionItem = itemDto.toBuilder().description("rusty and old").build();
         itemController.update(userId, updatedDescriptionItem, itemDto.getId());
 
-        Optional<ItemResponseDto> itemOptional = Optional.ofNullable(itemController.getById(userId, itemDto.getId()));
+        Optional<ItemOutDto> itemOptional = Optional.ofNullable(itemController.getById(userId, itemDto.getId()));
         assertThat(itemOptional).hasValueSatisfying(item -> assertThat(item)
                 .hasFieldOrPropertyWithValue("id", item.getId())
                 .hasFieldOrPropertyWithValue("description", "rusty and old")
@@ -523,7 +523,7 @@ class ShareItTests {
         ItemDto itemDto = itemController.create(userId, screwDriver);
         itemController.update(userId, onlyAvailable, itemDto.getId());
 
-        Optional<ItemResponseDto> itemOptional = Optional.ofNullable(itemController.getById(userId, itemDto.getId()));
+        Optional<ItemOutDto> itemOptional = Optional.ofNullable(itemController.getById(userId, itemDto.getId()));
         assertThat(itemOptional).hasValueSatisfying(item -> assertThat(item)
                 .hasFieldOrPropertyWithValue("id", item.getId())
                 .hasFieldOrPropertyWithValue("description", "new")
@@ -542,7 +542,7 @@ class ShareItTests {
         ItemDto itemDto = itemController.create(userId, screwDriver);
         itemController.update(userId, onlyDescription, itemDto.getId());
 
-        Optional<ItemResponseDto> itemOptional = Optional.ofNullable(itemController.getById(userId, itemDto.getId()));
+        Optional<ItemOutDto> itemOptional = Optional.ofNullable(itemController.getById(userId, itemDto.getId()));
         assertThat(itemOptional).hasValueSatisfying(item -> assertThat(item)
                 .hasFieldOrPropertyWithValue("id", item.getId())
                 .hasFieldOrPropertyWithValue("description", "patched description")
@@ -561,7 +561,7 @@ class ShareItTests {
         ItemDto itemDto = itemController.create(userId, screwDriver);
         itemController.update(userId, onlyName, itemDto.getId());
 
-        Optional<ItemResponseDto> itemOptional = Optional.ofNullable(itemController.getById(userId, itemDto.getId()));
+        Optional<ItemOutDto> itemOptional = Optional.ofNullable(itemController.getById(userId, itemDto.getId()));
         assertThat(itemOptional).hasValueSatisfying(item -> assertThat(item)
                 .hasFieldOrPropertyWithValue("id", item.getId())
                 .hasFieldOrPropertyWithValue("description", "new")
@@ -578,15 +578,15 @@ class ShareItTests {
 
         UserDto userDto = userController.create(userAlex1);
         ItemDto itemDto = itemController.create(1L, screwDriver);
-        ItemResponseDto itemResponseDto = ItemMapper.toItemResponseDto(itemDto);
+        ItemOutDto itemOutDto = ItemMapper.toItemOutDto(itemDto);
         final Long userId = userDto.getId();
         final Long itemId = itemDto.getId();
-        List<ItemResponseDto> listWithItem = itemController.getListByUser(userId);
+        List<ItemOutDto> listWithItem = itemController.getListByUser(userId);
         assertThat(listWithItem).asList().hasSize(1);
-        assertThat(listWithItem).asList().contains(itemResponseDto);
+        assertThat(listWithItem).asList().contains(itemOutDto);
 
         itemController.delete(itemId);
-        List<ItemResponseDto> list = itemController.getListByUser(userId);
+        List<ItemOutDto> list = itemController.getListByUser(userId);
         assertThat(list).asList().hasSize(0);
         assertThat(list).asList().isEmpty();
 
@@ -606,17 +606,17 @@ class ShareItTests {
         ItemDto item1Dto = itemController.create(user1Id, screwDriver);
         ItemDto item2Dto = itemController.create(user1Id, lawnMower);
         ItemDto item3Dto = itemController.create(user4Id, bike);
-        ItemResponseDto item1ResponseDto = ItemMapper.toItemResponseDto(item1Dto);
-        ItemResponseDto item2ResponseDto = ItemMapper.toItemResponseDto(item2Dto);
-        ItemResponseDto item3ResponseDto = ItemMapper.toItemResponseDto(item3Dto);
+        ItemOutDto item1OutDto = ItemMapper.toItemOutDto(item1Dto);
+        ItemOutDto item2OutDto = ItemMapper.toItemOutDto(item2Dto);
+        ItemOutDto item3OutDto = ItemMapper.toItemOutDto(item3Dto);
 
-        List<ItemResponseDto> listItems = itemController.getListByUser(user1Id);
-        List<ItemResponseDto> list2Items = itemController.getListByUser(user4Id);
+        List<ItemOutDto> listItems = itemController.getListByUser(user1Id);
+        List<ItemOutDto> list2Items = itemController.getListByUser(user4Id);
 
         assertThat(listItems).asList().hasSize(2);
 
-        assertThat(listItems).asList().contains(item1ResponseDto);
-        assertThat(listItems).asList().contains(item2ResponseDto);
+        assertThat(listItems).asList().contains(item1OutDto);
+        assertThat(listItems).asList().contains(item2OutDto);
 
         assertThat(Optional.of(listItems.get(0))).hasValueSatisfying(
                 user -> AssertionsForClassTypes.assertThat(user)
@@ -627,7 +627,7 @@ class ShareItTests {
                         .hasFieldOrPropertyWithValue("available", false));
 
         assertThat(list2Items).asList().hasSize(1);
-        assertThat(list2Items).asList().contains(item3ResponseDto);
+        assertThat(list2Items).asList().contains(item3OutDto);
         assertThat(Optional.of(listItems.get(0))).hasValueSatisfying(
                 user -> AssertionsForClassTypes.assertThat(user)
                         .hasFieldOrPropertyWithValue("available", true));
@@ -653,7 +653,7 @@ class ShareItTests {
         // получаем список доступных вещей, содержащих в названии или описании подстроку er без учета регистра
         // проверяем корректность полученных данных - 1 вещь,
 
-        List<ItemResponseDto> listItems = itemController.searchItemsBySubstring("Er");
+        List<ItemOutDto> listItems = itemController.searchItemsBySubstring("Er");
 
         assertThat(listItems).asList().hasSize(1);
 
@@ -666,7 +666,7 @@ class ShareItTests {
 
         // получаем список доступных вещей, содержащих в названии или описании подстроку er без учета регистра
         // проверяем корректность полученных данных - 2 вещи,
-        List<ItemResponseDto> list2Items = itemController.searchItemsBySubstring("e");
+        List<ItemOutDto> list2Items = itemController.searchItemsBySubstring("e");
 
         assertThat(list2Items).asList().hasSize(2);
 
@@ -696,14 +696,14 @@ class ShareItTests {
         Item item = ItemMapper.toItem(itemDto, owner, null);
         bookingController.create(bookerId, bookingItem1Future);
 
-        Optional<BookingResponseDto> bookingOptional =
+        Optional<BookingOutDto> bookingOptional =
                 Optional.ofNullable(bookingController.getById(ownerId, itemDto.getId()));
         assertThat(bookingOptional).hasValueSatisfying(booking -> assertThat(booking)
                 .hasFieldOrPropertyWithValue("id", booking.getId())
                 .hasFieldOrPropertyWithValue("start",
-                        LocalDateTime.of(2024, 1, 2, 20, 11, 11))
+                        LocalDateTime.of(2030, 1, 2, 20, 11, 11))
                 .hasFieldOrPropertyWithValue("end",
-                        LocalDateTime.of(2024, 2, 1, 1, 1, 1))
+                        LocalDateTime.of(2030, 2, 1, 1, 1, 1))
                 .hasFieldOrPropertyWithValue("booker", booker)
                 .hasFieldOrPropertyWithValue("item", item)
                 .hasFieldOrPropertyWithValue("status", BookingStatus.WAITING));
@@ -725,14 +725,14 @@ class ShareItTests {
         Item item = ItemMapper.toItem(itemDto, owner, null);
         bookingController.create(bookerId, bookingItem1Future);
 
-        Optional<BookingResponseDto> bookingOptional =
+        Optional<BookingOutDto> bookingOptional =
                 Optional.ofNullable(bookingController.getById(bookerId, itemDto.getId()));
         assertThat(bookingOptional).hasValueSatisfying(booking -> assertThat(booking)
                 .hasFieldOrPropertyWithValue("id", booking.getId())
                 .hasFieldOrPropertyWithValue("start",
-                        LocalDateTime.of(2024, 1, 2, 20, 11, 11))
+                        LocalDateTime.of(2030, 1, 2, 20, 11, 11))
                 .hasFieldOrPropertyWithValue("end",
-                        LocalDateTime.of(2024, 2, 1, 1, 1, 1))
+                        LocalDateTime.of(2030, 2, 1, 1, 1, 1))
                 .hasFieldOrPropertyWithValue("booker", booker)
                 .hasFieldOrPropertyWithValue("item", item)
                 .hasFieldOrPropertyWithValue("status", BookingStatus.WAITING));
@@ -897,19 +897,19 @@ class ShareItTests {
         User booker = UserMapper.toUser(userDto1);
         ItemDto itemDto = itemController.create(ownerId, screwDriver);
         Item item = ItemMapper.toItem(itemDto, owner, null);
-        BookingResponseDto bookingFirst = bookingController.create(bookerId, bookingItem1Future);
+        BookingOutDto bookingFirst = bookingController.create(bookerId, bookingItem1Future);
         Long bookingId = bookingFirst.getId();
         bookingController.updateStatus(ownerId, bookingId, true);
 
 
-        Optional<BookingResponseDto> bookingOptional =
+        Optional<BookingOutDto> bookingOptional =
                 Optional.ofNullable(bookingController.getById(ownerId, itemDto.getId()));
         assertThat(bookingOptional).hasValueSatisfying(booking -> assertThat(booking)
                 .hasFieldOrPropertyWithValue("id", booking.getId())
                 .hasFieldOrPropertyWithValue("start",
-                        LocalDateTime.of(2024, 1, 2, 20, 11, 11))
+                        LocalDateTime.of(2030, 1, 2, 20, 11, 11))
                 .hasFieldOrPropertyWithValue("end",
-                        LocalDateTime.of(2024, 2, 1, 1, 1, 1))
+                        LocalDateTime.of(2030, 2, 1, 1, 1, 1))
                 .hasFieldOrPropertyWithValue("booker", booker)
                 .hasFieldOrPropertyWithValue("item", item)
                 .hasFieldOrPropertyWithValue("status", BookingStatus.APPROVED));
@@ -929,19 +929,19 @@ class ShareItTests {
         User booker = UserMapper.toUser(userDto1);
         ItemDto itemDto = itemController.create(ownerId, screwDriver);
         Item item = ItemMapper.toItem(itemDto, owner, null);
-        BookingResponseDto bookingFirst = bookingController.create(bookerId, bookingItem1Future);
+        BookingOutDto bookingFirst = bookingController.create(bookerId, bookingItem1Future);
         Long bookingId = bookingFirst.getId();
         bookingController.updateStatus(ownerId, bookingId, false);
 
 
-        Optional<BookingResponseDto> bookingOptional =
+        Optional<BookingOutDto> bookingOptional =
                 Optional.ofNullable(bookingController.getById(ownerId, itemDto.getId()));
         assertThat(bookingOptional).hasValueSatisfying(booking -> assertThat(booking)
                 .hasFieldOrPropertyWithValue("id", booking.getId())
                 .hasFieldOrPropertyWithValue("start",
-                        LocalDateTime.of(2024, 1, 2, 20, 11, 11))
+                        LocalDateTime.of(2030, 1, 2, 20, 11, 11))
                 .hasFieldOrPropertyWithValue("end",
-                        LocalDateTime.of(2024, 2, 1, 1, 1, 1))
+                        LocalDateTime.of(2030, 2, 1, 1, 1, 1))
                 .hasFieldOrPropertyWithValue("booker", booker)
                 .hasFieldOrPropertyWithValue("item", item)
                 .hasFieldOrPropertyWithValue("status", BookingStatus.REJECTED));
@@ -962,19 +962,19 @@ class ShareItTests {
         User booker = UserMapper.toUser(userDto1);
         ItemDto itemDto = itemController.create(ownerId, screwDriver);
         Item item = ItemMapper.toItem(itemDto, owner, null);
-        BookingResponseDto bookingFirst = bookingController.create(bookerId, bookingItem1Future);
+        BookingOutDto bookingFirst = bookingController.create(bookerId, bookingItem1Future);
         Long bookingId = bookingFirst.getId();
         bookingController.updateStatus(ownerId, bookingId, false);
 
 
-        Optional<BookingResponseDto> bookingOptional =
+        Optional<BookingOutDto> bookingOptional =
                 Optional.ofNullable(bookingController.getById(ownerId, itemDto.getId()));
         assertThat(bookingOptional).hasValueSatisfying(booking -> assertThat(booking)
                 .hasFieldOrPropertyWithValue("id", booking.getId())
                 .hasFieldOrPropertyWithValue("start",
-                        LocalDateTime.of(2024, 1, 2, 20, 11, 11))
+                        LocalDateTime.of(2030, 1, 2, 20, 11, 11))
                 .hasFieldOrPropertyWithValue("end",
-                        LocalDateTime.of(2024, 2, 1, 1, 1, 1))
+                        LocalDateTime.of(2030, 2, 1, 1, 1, 1))
                 .hasFieldOrPropertyWithValue("booker", booker)
                 .hasFieldOrPropertyWithValue("item", item)
                 .hasFieldOrPropertyWithValue("status", BookingStatus.REJECTED));
@@ -1000,19 +1000,19 @@ class ShareItTests {
         User booker = UserMapper.toUser(userDto1);
         ItemDto itemDto = itemController.create(ownerId, screwDriver);
         Item item = ItemMapper.toItem(itemDto, owner, null);
-        BookingResponseDto bookingFirst = bookingController.create(bookerId, bookingItem1Future);
+        BookingOutDto bookingFirst = bookingController.create(bookerId, bookingItem1Future);
         Long bookingId = bookingFirst.getId();
         bookingController.updateStatus(ownerId, bookingId, true);
 
 
-        Optional<BookingResponseDto> bookingOptional =
+        Optional<BookingOutDto> bookingOptional =
                 Optional.ofNullable(bookingController.getById(ownerId, itemDto.getId()));
         assertThat(bookingOptional).hasValueSatisfying(booking -> assertThat(booking)
                 .hasFieldOrPropertyWithValue("id", booking.getId())
                 .hasFieldOrPropertyWithValue("start",
-                        LocalDateTime.of(2024, 1, 2, 20, 11, 11))
+                        LocalDateTime.of(2030, 1, 2, 20, 11, 11))
                 .hasFieldOrPropertyWithValue("end",
-                        LocalDateTime.of(2024, 2, 1, 1, 1, 1))
+                        LocalDateTime.of(2030, 2, 1, 1, 1, 1))
                 .hasFieldOrPropertyWithValue("booker", booker)
                 .hasFieldOrPropertyWithValue("item", item)
                 .hasFieldOrPropertyWithValue("status", BookingStatus.APPROVED));
@@ -1031,7 +1031,7 @@ class ShareItTests {
     public void shouldFailGetListOfAllBookingByNonExistingUserAsOwner() {
 
         assertThrows(ObjectNotFoundException.class,
-                () -> bookingController.getListByOwner(nonExistingId, "APPROVED"),
+                () -> bookingController.getListByOwner(nonExistingId, "APPROVED", 0, 10),
                 "Не выброшено исключение ObjectNotFoundException.");
 
     }
@@ -1048,9 +1048,9 @@ class ShareItTests {
         itemController.create(ownerId, screwDriver);
         bookingController.create(bookerId, bookingItem1Future);
         itemController.create(ownerId, adultBike);
-        BookingResponseDto bookingSecondFutureItem1 = bookingController.create(bookerId, bookingItem1Future2);
-        BookingResponseDto bookingThirdFutureItem1 = bookingController.create(bookerId, bookingItem1Future3);
-        BookingResponseDto bookingCurrentItem2 = bookingController.create(bookerId, bookingItem2);
+        BookingOutDto bookingSecondFutureItem1 = bookingController.create(bookerId, bookingItem1Future2);
+        BookingOutDto bookingThirdFutureItem1 = bookingController.create(bookerId, bookingItem1Future3);
+        BookingOutDto bookingCurrentItem2 = bookingController.create(bookerId, bookingItem2);
 
         Long booking2FutureItem1Id = bookingSecondFutureItem1.getId();
         Long booking3FutureItem1Id = bookingThirdFutureItem1.getId();
@@ -1061,7 +1061,7 @@ class ShareItTests {
         bookingController.updateStatus(ownerId, booking4CurrentItem2Id, true);
 
         assertThrows(UnsupportedStatusException.class,
-                () -> bookingController.getListByOwner(ownerId, "NOT_SUPPORTED"),
+                () -> bookingController.getListByOwner(ownerId, "NOT_SUPPORTED", 0, 10),
                 "Не выброшено исключение UnsupportedStatusException.");
 
     }
@@ -1082,21 +1082,21 @@ class ShareItTests {
         itemController.create(ownerId, adultBike);
 
         bookingController.create(bookerId, bookingItem1Future);
-        BookingResponseDto bookingSecondFutureItem1 = bookingController.create(bookerId, bookingItem1Future2);
-        BookingResponseDto bookingThirdFutureItem1 = bookingController.create(bookerId, bookingItem1Future3);
-        BookingResponseDto bookingFirstItem2 = bookingController.create(bookerId, bookingItem2);
+        BookingOutDto bookingSecondFutureItem1 = bookingController.create(bookerId, bookingItem1Future2);
+        BookingOutDto bookingThirdFutureItem1 = bookingController.create(bookerId, bookingItem1Future3);
+        BookingOutDto bookingFirstItem2 = bookingController.create(bookerId, bookingItem2);
 
         Long booking2FutureItem1Id = bookingSecondFutureItem1.getId();
         Long booking3FutureItem1Id = bookingThirdFutureItem1.getId();
         Long booking4Item2Id = bookingFirstItem2.getId();
 
         bookingController.updateStatus(ownerId, booking2FutureItem1Id, false);
-        BookingResponseDto booking3ApprovedItem1Future = bookingController.updateStatus(ownerId,
+        BookingOutDto booking3ApprovedItem1Future = bookingController.updateStatus(ownerId,
                 booking3FutureItem1Id, true);
-        BookingResponseDto booking4ApprovedItem2 = bookingController.updateStatus(ownerId,
+        BookingOutDto booking4ApprovedItem2 = bookingController.updateStatus(ownerId,
                 booking4Item2Id, true);
 
-        List<BookingResponseDto> listAllBookings = bookingController.getListByOwner(ownerId, "ALL");
+        List<BookingOutDto> listAllBookings = bookingController.getListByOwner(ownerId, "ALL", 0, 10);
 
         assertThat(listAllBookings).asList().hasSize(4);
         assertThat(listAllBookings).asList().startsWith(booking3ApprovedItem1Future);
@@ -1106,9 +1106,9 @@ class ShareItTests {
                 booking -> AssertionsForClassTypes.assertThat(booking)
                         .hasFieldOrPropertyWithValue("id", booking.getId())
                         .hasFieldOrPropertyWithValue("start",
-                                LocalDateTime.of(2024, 4, 2, 20, 11, 11))
+                                LocalDateTime.of(2030, 4, 2, 20, 11, 11))
                         .hasFieldOrPropertyWithValue("end",
-                                LocalDateTime.of(2024, 4, 3, 1, 1, 1))
+                                LocalDateTime.of(2030, 4, 3, 1, 1, 1))
                         .hasFieldOrPropertyWithValue("booker", booker)
                         .hasFieldOrPropertyWithValue("item", item1)
                         .hasFieldOrPropertyWithValue("status", BookingStatus.APPROVED));
@@ -1131,21 +1131,21 @@ class ShareItTests {
         itemController.create(ownerId, adultBike);
 
         bookingController.create(bookerId, bookingItem1Future);
-        BookingResponseDto bookingSecondFutureItem1 = bookingController.create(bookerId, bookingItem1Future2);
-        BookingResponseDto bookingThirdFutureItem1 = bookingController.create(bookerId, bookingItem1Future3);
-        BookingResponseDto bookingCurrentItem2 = bookingController.create(bookerId, bookingItem2);
+        BookingOutDto bookingSecondFutureItem1 = bookingController.create(bookerId, bookingItem1Future2);
+        BookingOutDto bookingThirdFutureItem1 = bookingController.create(bookerId, bookingItem1Future3);
+        BookingOutDto bookingCurrentItem2 = bookingController.create(bookerId, bookingItem2);
 
         Long booking2FutureItem1Id = bookingSecondFutureItem1.getId();
         Long booking3FutureItem1Id = bookingThirdFutureItem1.getId();
         Long booking4Item2Id = bookingCurrentItem2.getId();
 
         bookingController.updateStatus(ownerId, booking2FutureItem1Id, false);
-        BookingResponseDto booking3ApprovedItem1Future = bookingController.updateStatus(ownerId,
+        BookingOutDto booking3ApprovedItem1Future = bookingController.updateStatus(ownerId,
                 booking3FutureItem1Id, true);
-        BookingResponseDto booking4ApprovedItem2 = bookingController.updateStatus(ownerId,
+        BookingOutDto booking4ApprovedItem2 = bookingController.updateStatus(ownerId,
                 booking4Item2Id, true);
 
-        List<BookingResponseDto> listFutureBookings = bookingController.getListByOwner(ownerId, "FUTURE");
+        List<BookingOutDto> listFutureBookings = bookingController.getListByOwner(ownerId, "FUTURE", 0, 10);
 
         assertThat(listFutureBookings).asList().hasSize(4);
         assertThat(listFutureBookings).asList().startsWith(booking3ApprovedItem1Future);
@@ -1155,9 +1155,9 @@ class ShareItTests {
                 booking -> AssertionsForClassTypes.assertThat(booking)
                         .hasFieldOrPropertyWithValue("id", booking.getId())
                         .hasFieldOrPropertyWithValue("start",
-                                LocalDateTime.of(2024, 4, 2, 20, 11, 11))
+                                LocalDateTime.of(2030, 4, 2, 20, 11, 11))
                         .hasFieldOrPropertyWithValue("end",
-                                LocalDateTime.of(2024, 4, 3, 1, 1, 1))
+                                LocalDateTime.of(2030, 4, 3, 1, 1, 1))
                         .hasFieldOrPropertyWithValue("booker", booker)
                         .hasFieldOrPropertyWithValue("item", item1)
                         .hasFieldOrPropertyWithValue("status", BookingStatus.APPROVED));
@@ -1179,10 +1179,10 @@ class ShareItTests {
         Item item1 = ItemMapper.toItem(itemDto1, owner, null);
         itemController.create(ownerId, adultBike);
 
-        BookingResponseDto bookingFirstFutureItem1 = bookingController.create(bookerId, bookingItem1Future);
-        BookingResponseDto bookingSecondFutureItem1 = bookingController.create(bookerId, bookingItem1Future2);
-        BookingResponseDto bookingThirdFutureItem1 = bookingController.create(bookerId, bookingItem1Future3);
-        BookingResponseDto bookingCurrentItem2 = bookingController.create(bookerId, bookingItem2);
+        BookingOutDto bookingFirstFutureItem1 = bookingController.create(bookerId, bookingItem1Future);
+        BookingOutDto bookingSecondFutureItem1 = bookingController.create(bookerId, bookingItem1Future2);
+        BookingOutDto bookingThirdFutureItem1 = bookingController.create(bookerId, bookingItem1Future3);
+        BookingOutDto bookingCurrentItem2 = bookingController.create(bookerId, bookingItem2);
 
         Long booking2FutureItem1Id = bookingSecondFutureItem1.getId();
         Long booking3FutureItem1Id = bookingThirdFutureItem1.getId();
@@ -1192,7 +1192,7 @@ class ShareItTests {
         bookingController.updateStatus(ownerId, booking3FutureItem1Id, true);
         bookingController.updateStatus(ownerId, booking4Item2Id, true);
 
-        List<BookingResponseDto> listWaitingBookings = bookingController.getListByOwner(ownerId, "WAITING");
+        List<BookingOutDto> listWaitingBookings = bookingController.getListByOwner(ownerId, "WAITING", 0, 10);
 
         assertThat(listWaitingBookings).asList().hasSize(1);
         assertThat(listWaitingBookings).asList().contains(bookingFirstFutureItem1);
@@ -1201,9 +1201,9 @@ class ShareItTests {
                 booking -> AssertionsForClassTypes.assertThat(booking)
                         .hasFieldOrPropertyWithValue("id", booking.getId())
                         .hasFieldOrPropertyWithValue("start",
-                                LocalDateTime.of(2024, 1, 2, 20, 11, 11))
+                                LocalDateTime.of(2030, 1, 2, 20, 11, 11))
                         .hasFieldOrPropertyWithValue("end",
-                                LocalDateTime.of(2024, 2, 1, 1, 1, 1))
+                                LocalDateTime.of(2030, 2, 1, 1, 1, 1))
                         .hasFieldOrPropertyWithValue("booker", booker)
                         .hasFieldOrPropertyWithValue("item", item1)
                         .hasFieldOrPropertyWithValue("status", BookingStatus.WAITING));
@@ -1227,20 +1227,20 @@ class ShareItTests {
         itemController.create(ownerId, adultBike);
 
         bookingController.create(bookerId, bookingItem1Future);
-        BookingResponseDto bookingSecondFutureItem1 = bookingController.create(bookerId, bookingItem1Future2);
-        BookingResponseDto bookingThirdFutureItem1 = bookingController.create(bookerId, bookingItem1Future3);
-        BookingResponseDto bookingCurrentItem2 = bookingController.create(bookerId, bookingItem2);
+        BookingOutDto bookingSecondFutureItem1 = bookingController.create(bookerId, bookingItem1Future2);
+        BookingOutDto bookingThirdFutureItem1 = bookingController.create(bookerId, bookingItem1Future3);
+        BookingOutDto bookingCurrentItem2 = bookingController.create(bookerId, bookingItem2);
 
         Long booking2FutureItem1Id = bookingSecondFutureItem1.getId();
         Long booking3FutureItem1Id = bookingThirdFutureItem1.getId();
         Long booking4Item2Id = bookingCurrentItem2.getId();
 
-        BookingResponseDto booking2RejectedItem1Future = bookingController.updateStatus(ownerId,
+        BookingOutDto booking2RejectedItem1Future = bookingController.updateStatus(ownerId,
                 booking2FutureItem1Id, false);
         bookingController.updateStatus(ownerId, booking3FutureItem1Id, true);
         bookingController.updateStatus(ownerId, booking4Item2Id, true);
 
-        List<BookingResponseDto> listRejectedBookings = bookingController.getListByOwner(ownerId, "REJECTED");
+        List<BookingOutDto> listRejectedBookings = bookingController.getListByOwner(ownerId, "REJECTED", 0, 10);
 
         assertThat(listRejectedBookings).asList().hasSize(1);
         assertThat(listRejectedBookings).asList().contains(booking2RejectedItem1Future);
@@ -1249,9 +1249,9 @@ class ShareItTests {
                 booking -> AssertionsForClassTypes.assertThat(booking)
                         .hasFieldOrPropertyWithValue("id", booking.getId())
                         .hasFieldOrPropertyWithValue("start",
-                                LocalDateTime.of(2024, 2, 2, 20, 11, 11))
+                                LocalDateTime.of(2030, 2, 2, 20, 11, 11))
                         .hasFieldOrPropertyWithValue("end",
-                                LocalDateTime.of(2024, 3, 1, 1, 1, 1))
+                                LocalDateTime.of(2030, 3, 1, 1, 1, 1))
                         .hasFieldOrPropertyWithValue("booker", booker)
                         .hasFieldOrPropertyWithValue("item", item1)
                         .hasFieldOrPropertyWithValue("status", BookingStatus.REJECTED));
@@ -1268,7 +1268,7 @@ class ShareItTests {
         userController.create(userOlga4);
         Long ownerId = userDto.getId();
 
-        List<BookingResponseDto> listUsers = bookingController.getListByOwner(ownerId, "ALL");
+        List<BookingOutDto> listUsers = bookingController.getListByOwner(ownerId, "ALL", 0, 10);
 
         assertThat(listUsers).asList().hasSize(0);
         assertThat(listUsers).asList().isEmpty();
@@ -1282,7 +1282,7 @@ class ShareItTests {
     public void shouldFailGetListOfAllBookingByNonExistingUserAsBooker() {
 
         assertThrows(ObjectNotFoundException.class,
-                () -> bookingController.getListByBooker(nonExistingId, "APPROVED"),
+                () -> bookingController.getListByBooker(nonExistingId, "APPROVED", 0, 10),
                 "Не выброшено исключение ObjectNotFoundException.");
 
     }
@@ -1299,9 +1299,9 @@ class ShareItTests {
         itemController.create(ownerId, screwDriver);
         itemController.create(ownerId, adultBike);
         bookingController.create(bookerId, bookingItem1Future);
-        BookingResponseDto bookingSecondFutureItem1 = bookingController.create(bookerId, bookingItem1Future2);
-        BookingResponseDto bookingThirdFutureItem1 = bookingController.create(bookerId, bookingItem1Future3);
-        BookingResponseDto bookingCurrentItem2 = bookingController.create(bookerId, bookingItem2);
+        BookingOutDto bookingSecondFutureItem1 = bookingController.create(bookerId, bookingItem1Future2);
+        BookingOutDto bookingThirdFutureItem1 = bookingController.create(bookerId, bookingItem1Future3);
+        BookingOutDto bookingCurrentItem2 = bookingController.create(bookerId, bookingItem2);
 
         Long booking2FutureItem1Id = bookingSecondFutureItem1.getId();
         Long booking3FutureItem1Id = bookingThirdFutureItem1.getId();
@@ -1312,7 +1312,7 @@ class ShareItTests {
         bookingController.updateStatus(ownerId, booking4Item2Id, true);
 
         assertThrows(UnsupportedStatusException.class,
-                () -> bookingController.getListByOwner(bookerId, "NOT_SUPPORTED"),
+                () -> bookingController.getListByOwner(bookerId, "NOT_SUPPORTED", 0, 10),
                 "Не выброшено исключение UnsupportedStatusException.");
 
     }
@@ -1333,21 +1333,21 @@ class ShareItTests {
         bookingController.create(bookerId, bookingItem1Future);
         itemController.create(ownerId, adultBike);
 
-        BookingResponseDto bookingSecondFutureItem1 = bookingController.create(bookerId, bookingItem1Future2);
-        BookingResponseDto bookingThirdFutureItem1 = bookingController.create(bookerId, bookingItem1Future3);
-        BookingResponseDto bookingCurrentItem2 = bookingController.create(bookerId, bookingItem2);
+        BookingOutDto bookingSecondFutureItem1 = bookingController.create(bookerId, bookingItem1Future2);
+        BookingOutDto bookingThirdFutureItem1 = bookingController.create(bookerId, bookingItem1Future3);
+        BookingOutDto bookingCurrentItem2 = bookingController.create(bookerId, bookingItem2);
 
         Long booking2FutureItem1Id = bookingSecondFutureItem1.getId();
         Long booking3FutureItem1Id = bookingThirdFutureItem1.getId();
         Long booking4Item2Id = bookingCurrentItem2.getId();
 
         bookingController.updateStatus(ownerId, booking2FutureItem1Id, false);
-        BookingResponseDto booking3ApprovedItem1Future = bookingController.updateStatus(ownerId,
+        BookingOutDto booking3ApprovedItem1Future = bookingController.updateStatus(ownerId,
                 booking3FutureItem1Id, true);
-        BookingResponseDto booking4ApprovedItem2 = bookingController.updateStatus(ownerId,
+        BookingOutDto booking4ApprovedItem2 = bookingController.updateStatus(ownerId,
                 booking4Item2Id, true);
 
-        List<BookingResponseDto> listAllBookings = bookingController.getListByOwner(ownerId, "ALL");
+        List<BookingOutDto> listAllBookings = bookingController.getListByOwner(ownerId, "ALL", 0, 10);
 
         assertThat(listAllBookings).asList().hasSize(4);
         assertThat(listAllBookings).asList().startsWith(booking3ApprovedItem1Future);
@@ -1357,9 +1357,9 @@ class ShareItTests {
                 booking -> AssertionsForClassTypes.assertThat(booking)
                         .hasFieldOrPropertyWithValue("id", booking.getId())
                         .hasFieldOrPropertyWithValue("start",
-                                LocalDateTime.of(2024, 4, 2, 20, 11, 11))
+                                LocalDateTime.of(2030, 4, 2, 20, 11, 11))
                         .hasFieldOrPropertyWithValue("end",
-                                LocalDateTime.of(2024, 4, 3, 1, 1, 1))
+                                LocalDateTime.of(2030, 4, 3, 1, 1, 1))
                         .hasFieldOrPropertyWithValue("booker", booker)
                         .hasFieldOrPropertyWithValue("item", item1)
                         .hasFieldOrPropertyWithValue("status", BookingStatus.APPROVED));
@@ -1382,21 +1382,21 @@ class ShareItTests {
         itemController.create(ownerId, adultBike);
 
         bookingController.create(bookerId, bookingItem1Future);
-        BookingResponseDto bookingSecondFutureItem1 = bookingController.create(bookerId, bookingItem1Future2);
-        BookingResponseDto bookingThirdFutureItem1 = bookingController.create(bookerId, bookingItem1Future3);
-        BookingResponseDto bookingCurrentItem2 = bookingController.create(bookerId, bookingItem2);
+        BookingOutDto bookingSecondFutureItem1 = bookingController.create(bookerId, bookingItem1Future2);
+        BookingOutDto bookingThirdFutureItem1 = bookingController.create(bookerId, bookingItem1Future3);
+        BookingOutDto bookingCurrentItem2 = bookingController.create(bookerId, bookingItem2);
 
         Long booking2FutureItem1Id = bookingSecondFutureItem1.getId();
         Long booking3FutureItem1Id = bookingThirdFutureItem1.getId();
         Long booking4Item2Id = bookingCurrentItem2.getId();
 
         bookingController.updateStatus(ownerId, booking2FutureItem1Id, false);
-        BookingResponseDto booking3ApprovedItem1Future = bookingController.updateStatus(ownerId,
+        BookingOutDto booking3ApprovedItem1Future = bookingController.updateStatus(ownerId,
                 booking3FutureItem1Id, true);
-        BookingResponseDto booking4ApprovedItem2 = bookingController.updateStatus(ownerId,
+        BookingOutDto booking4ApprovedItem2 = bookingController.updateStatus(ownerId,
                 booking4Item2Id, true);
 
-        List<BookingResponseDto> listFutureBookings = bookingController.getListByBooker(bookerId, "FUTURE");
+        List<BookingOutDto> listFutureBookings = bookingController.getListByBooker(bookerId, "FUTURE", 0, 10);
 
         assertThat(listFutureBookings).asList().hasSize(4);
         assertThat(listFutureBookings).asList().startsWith(booking3ApprovedItem1Future);
@@ -1406,9 +1406,9 @@ class ShareItTests {
                 booking -> AssertionsForClassTypes.assertThat(booking)
                         .hasFieldOrPropertyWithValue("id", booking.getId())
                         .hasFieldOrPropertyWithValue("start",
-                                LocalDateTime.of(2024, 4, 2, 20, 11, 11))
+                                LocalDateTime.of(2030, 4, 2, 20, 11, 11))
                         .hasFieldOrPropertyWithValue("end",
-                                LocalDateTime.of(2024, 4, 3, 1, 1, 1))
+                                LocalDateTime.of(2030, 4, 3, 1, 1, 1))
                         .hasFieldOrPropertyWithValue("booker", booker)
                         .hasFieldOrPropertyWithValue("item", item1)
                         .hasFieldOrPropertyWithValue("status", BookingStatus.APPROVED));
@@ -1430,10 +1430,10 @@ class ShareItTests {
         ItemDto itemDto1 = itemController.create(ownerId, screwDriver);
         Item item1 = ItemMapper.toItem(itemDto1, owner, null);
         itemController.create(ownerId, adultBike);
-        BookingResponseDto bookingFirstFutureItem1 = bookingController.create(bookerId, bookingItem1Future);
-        BookingResponseDto bookingSecondFutureItem1 = bookingController.create(bookerId, bookingItem1Future2);
-        BookingResponseDto bookingThirdFutureItem1 = bookingController.create(bookerId, bookingItem1Future3);
-        BookingResponseDto bookingCurrentItem2 = bookingController.create(bookerId, bookingItem2);
+        BookingOutDto bookingFirstFutureItem1 = bookingController.create(bookerId, bookingItem1Future);
+        BookingOutDto bookingSecondFutureItem1 = bookingController.create(bookerId, bookingItem1Future2);
+        BookingOutDto bookingThirdFutureItem1 = bookingController.create(bookerId, bookingItem1Future3);
+        BookingOutDto bookingCurrentItem2 = bookingController.create(bookerId, bookingItem2);
 
         Long booking2FutureItem1Id = bookingSecondFutureItem1.getId();
         Long booking3FutureItem1Id = bookingThirdFutureItem1.getId();
@@ -1443,7 +1443,7 @@ class ShareItTests {
         bookingController.updateStatus(ownerId, booking3FutureItem1Id, true);
         bookingController.updateStatus(ownerId, booking4Item2Id, true);
 
-        List<BookingResponseDto> listWaitingBookings = bookingController.getListByBooker(bookerId, "WAITING");
+        List<BookingOutDto> listWaitingBookings = bookingController.getListByBooker(bookerId, "WAITING", 0, 10);
 
         assertThat(listWaitingBookings).asList().hasSize(1);
         assertThat(listWaitingBookings).asList().contains(bookingFirstFutureItem1);
@@ -1452,9 +1452,9 @@ class ShareItTests {
                 booking -> AssertionsForClassTypes.assertThat(booking)
                         .hasFieldOrPropertyWithValue("id", booking.getId())
                         .hasFieldOrPropertyWithValue("start",
-                                LocalDateTime.of(2024, 1, 2, 20, 11, 11))
+                                LocalDateTime.of(2030, 1, 2, 20, 11, 11))
                         .hasFieldOrPropertyWithValue("end",
-                                LocalDateTime.of(2024, 2, 1, 1, 1, 1))
+                                LocalDateTime.of(2030, 2, 1, 1, 1, 1))
                         .hasFieldOrPropertyWithValue("booker", booker)
                         .hasFieldOrPropertyWithValue("item", item1)
                         .hasFieldOrPropertyWithValue("status", BookingStatus.WAITING));
@@ -1478,20 +1478,20 @@ class ShareItTests {
         itemController.create(ownerId, adultBike);
 
         bookingController.create(bookerId, bookingItem1Future);
-        BookingResponseDto bookingSecondFutureItem1 = bookingController.create(bookerId, bookingItem1Future2);
-        BookingResponseDto bookingThirdFutureItem1 = bookingController.create(bookerId, bookingItem1Future3);
-        BookingResponseDto bookingCurrentItem2 = bookingController.create(bookerId, bookingItem2);
+        BookingOutDto bookingSecondFutureItem1 = bookingController.create(bookerId, bookingItem1Future2);
+        BookingOutDto bookingThirdFutureItem1 = bookingController.create(bookerId, bookingItem1Future3);
+        BookingOutDto bookingCurrentItem2 = bookingController.create(bookerId, bookingItem2);
 
         Long booking2FutureItem1Id = bookingSecondFutureItem1.getId();
         Long booking3FutureItem1Id = bookingThirdFutureItem1.getId();
         Long booking4Item2Id = bookingCurrentItem2.getId();
 
-        BookingResponseDto booking2RejectedItem1Future = bookingController.updateStatus(ownerId,
+        BookingOutDto booking2RejectedItem1Future = bookingController.updateStatus(ownerId,
                 booking2FutureItem1Id, false);
         bookingController.updateStatus(ownerId, booking3FutureItem1Id, true);
         bookingController.updateStatus(ownerId, booking4Item2Id, true);
 
-        List<BookingResponseDto> listFutureBookings = bookingController.getListByBooker(bookerId, "REJECTED");
+        List<BookingOutDto> listFutureBookings = bookingController.getListByBooker(bookerId, "REJECTED", 0, 10);
 
         assertThat(listFutureBookings).asList().hasSize(1);
         assertThat(listFutureBookings).asList().contains(booking2RejectedItem1Future);
@@ -1500,9 +1500,9 @@ class ShareItTests {
                 booking -> AssertionsForClassTypes.assertThat(booking)
                         .hasFieldOrPropertyWithValue("id", booking.getId())
                         .hasFieldOrPropertyWithValue("start",
-                                LocalDateTime.of(2024, 2, 2, 20, 11, 11))
+                                LocalDateTime.of(2030, 2, 2, 20, 11, 11))
                         .hasFieldOrPropertyWithValue("end",
-                                LocalDateTime.of(2024, 3, 1, 1, 1, 1))
+                                LocalDateTime.of(2030, 3, 1, 1, 1, 1))
                         .hasFieldOrPropertyWithValue("booker", booker)
                         .hasFieldOrPropertyWithValue("item", item1)
                         .hasFieldOrPropertyWithValue("status", BookingStatus.REJECTED));
@@ -1519,7 +1519,7 @@ class ShareItTests {
         UserDto userDto1 = userController.create(userOlga4);
         Long bookerId = userDto1.getId();
 
-        List<BookingResponseDto> listUsers = bookingController.getListByOwner(bookerId, "ALL");
+        List<BookingOutDto> listUsers = bookingController.getListByOwner(bookerId, "ALL", 0, 10);
 
         assertThat(listUsers).asList().hasSize(0);
         assertThat(listUsers).asList().isEmpty();
@@ -1630,10 +1630,10 @@ class ShareItTests {
         bookingController.create(bookerId, bookingItem1Future);
         Long bookingId = userDto.getId();
         bookingController.updateStatus(ownerId, bookingId, true);
-        CommentRequestDto commentRequestDto = commentToItem1First;
+        CommentDto commentDto = commentToItem1First;
 
         assertThrows(UnavailableItemException.class,
-                () -> itemController.addComment(bookerId, commentRequestDto, itemId),
+                () -> itemController.addComment(bookerId, commentDto, itemId),
                 "Не выброшено исключение UnavailableItemException.");
 
     }

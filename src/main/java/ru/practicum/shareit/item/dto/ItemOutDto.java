@@ -3,7 +3,7 @@ package ru.practicum.shareit.item.dto;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import ru.practicum.shareit.booking.dto.BookingItemResponseDto;
+import ru.practicum.shareit.booking.dto.BookingItemDto;
 import ru.practicum.shareit.util.groups.Create;
 
 import javax.validation.constraints.NotBlank;
@@ -12,12 +12,12 @@ import java.util.List;
 
 /**
  * Sprint add-bookings.
- * ItemResponseDto model.
+ * ItemOutDto model.
  */
 @Value
 @Builder(toBuilder = true)
 @RequiredArgsConstructor
-public class ItemResponseDto {
+public class ItemOutDto {
     Long id;
     @NotNull(groups = {Create.class})
     @NotBlank(groups = {Create.class})
@@ -27,8 +27,8 @@ public class ItemResponseDto {
     String description;
     @NotNull(groups = {Create.class})
     Boolean available;
-    BookingItemResponseDto lastBooking;
-    BookingItemResponseDto nextBooking;
+    BookingItemDto lastBooking;
+    BookingItemDto nextBooking;
     Long requestId;
-    List<CommentResponseDto> comments;
+    List<CommentOutDto> comments;
 }

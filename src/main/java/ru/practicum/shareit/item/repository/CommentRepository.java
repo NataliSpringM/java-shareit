@@ -8,10 +8,10 @@ import ru.practicum.shareit.item.model.Item;
 import java.util.List;
 
 /**
- * JpaRepository for comments
+ * Comment repository
  */
 @Repository
-public interface CommentJpaRepository extends JpaRepository<Comment, Long> {
+public interface CommentRepository extends JpaRepository<Comment, Long> {
     /**
      * find if exists all comments by itemId
      *
@@ -21,7 +21,7 @@ public interface CommentJpaRepository extends JpaRepository<Comment, Long> {
     List<Comment> findAllByItemId(Long itemId);
 
     /**
-     * find if exists all comments by itemIds
+     * find if exists all comments by items' list
      *
      * @param items items
      * @return list of comments by itemId or empty list

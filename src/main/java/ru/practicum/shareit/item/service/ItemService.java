@@ -1,10 +1,10 @@
 package ru.practicum.shareit.item.service;
 
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.item.dto.CommentRequestDto;
-import ru.practicum.shareit.item.dto.CommentResponseDto;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentOutDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.item.dto.ItemOutDto;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -30,7 +30,7 @@ public interface ItemService {
      * @param itemId item's id
      * @return item
      */
-    ItemResponseDto getById(Long userId, Long itemId);
+    ItemOutDto getById(Long userId, Long itemId);
 
     /**
      * update item's properties
@@ -55,7 +55,7 @@ public interface ItemService {
      * @param userId user's id
      * @return list of items
      */
-    List<ItemResponseDto> getListByUser(Long userId);
+    List<ItemOutDto> getListByUser(Long userId);
 
     /**
      * search all available items, contained substring in name or description
@@ -63,17 +63,17 @@ public interface ItemService {
      * @param text substring for search
      * @return list of items or empty list
      */
-    List<ItemResponseDto> searchItemsBySubstring(String text);
+    List<ItemOutDto> searchItemsBySubstring(String text);
 
     /**
      * add comment to a specific item
      *
-     * @param commentRequestDto comment
-     * @param userId            author's id
-     * @param itemId            item's id
+     * @param commentDto comment
+     * @param userId     author's id
+     * @param itemId     item's id
      * @return comment
      */
 
-    CommentResponseDto addComment(CommentRequestDto commentRequestDto, Long userId, Long itemId);
+    CommentOutDto addComment(CommentDto commentDto, Long userId, Long itemId);
 
 }

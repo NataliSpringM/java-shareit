@@ -6,12 +6,12 @@ import lombok.Value;
 
 /**
  * Sprint add-bookings.
- * BookingItemResponse DTO model for properties lastBooking and nextBooking in ItemResponseDto model.
+ * BookingForItem DTO model for properties lastBooking and nextBooking in ItemOutDto model.
  */
 @Value
 @Builder(toBuilder = true)
 @RequiredArgsConstructor
-public class BookingItemResponseDto {
+public class BookingItemDto {
     Long id;
     Long bookerId;
 }
