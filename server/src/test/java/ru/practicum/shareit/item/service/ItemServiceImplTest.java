@@ -1315,7 +1315,7 @@ public class ItemServiceImplTest {
         List<ItemOutDto> expectedItemsListByUser = List.of(itemOutDto1, itemOutDto2);
 
         //mock repository answers
-        when(itemRepository.findAllByOwnerId(ownerId)).thenReturn(items);
+        when(itemRepository.findAllByOwnerIdOrderById(ownerId)).thenReturn(items);
         when(commentRepository.findAllByItemIn(items)).thenReturn(comments);
         when(bookingRepository
                 .findFirstByItemIdAndStatusAndStartIsBeforeOrStartEqualsOrderByEndDesc(any(), any(), any(), any()))
@@ -1328,7 +1328,7 @@ public class ItemServiceImplTest {
         List<ItemOutDto> result = itemService.getListByUser(ownerId);
 
         // verify invokes
-        verify(itemRepository).findAllByOwnerId(ownerId);
+        verify(itemRepository).findAllByOwnerIdOrderById(ownerId);
         verify(commentRepository).findAllByItemIn(items);
         verify(bookingRepository, atLeast(1))
                 .findFirstByItemIdAndStatusAndStartIsBeforeOrStartEqualsOrderByEndDesc(any(), any(), any(), any());
@@ -1379,14 +1379,14 @@ public class ItemServiceImplTest {
         List<ItemOutDto> listByUser = Collections.emptyList();
 
         //mock repository answers
-        when(itemRepository.findAllByOwnerId(notOwnerId)).thenReturn(Collections.emptyList());
+        when(itemRepository.findAllByOwnerIdOrderById(notOwnerId)).thenReturn(Collections.emptyList());
         when(commentRepository.findAllByItemIn(Collections.emptyList())).thenReturn(Collections.emptyList());
 
         //invoke tested method
         List<ItemOutDto> result = itemService.getListByUser(notOwnerId);
 
         // verify invokes
-        verify(itemRepository).findAllByOwnerId(notOwnerId);
+        verify(itemRepository).findAllByOwnerIdOrderById(notOwnerId);
         verify(commentRepository).findAllByItemIn(Collections.emptyList());
         verify(bookingRepository, never())
                 .findFirstByItemIdAndStatusAndStartIsAfterOrStartEqualsOrderByStart(any(), any(), any(), any());

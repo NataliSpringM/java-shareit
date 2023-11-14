@@ -96,7 +96,7 @@ public class ItemRepositoryTest {
     @Test
     public void findAllByOwnerId() {
 
-        List<Item> result = itemRepository.findAllByOwnerId(ownerId);
+        List<Item> result = itemRepository.findAllByOwnerIdOrderById(ownerId);
 
         assertThat(result).asList()
                 .hasSize(2)

@@ -148,7 +148,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional(readOnly = true)
     public List<ItemOutDto> getListByUser(Long userId) {
 
-        List<Item> items = itemRepository.findAllByOwnerId(userId);
+        List<Item> items = itemRepository.findAllByOwnerIdOrderById(userId);
         Map<Item, List<Comment>> mapComments = getCommentsToAllItems(items);
         List<ItemOutDto> itemsResponses = items.stream()
                 .map(item -> getItemResponseDto(item,

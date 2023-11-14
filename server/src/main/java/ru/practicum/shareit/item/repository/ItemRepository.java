@@ -20,7 +20,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
      * @param userId user's id
      * @return list of items of a specific user or empty list
      */
-    List<Item> findAllByOwnerId(Long userId);
+    List<Item> findAllByOwnerIdOrderById(Long userId);
 
     /**
      * search all available items, contained substring in name or description,
